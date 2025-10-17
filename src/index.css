@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+:root {
+  --hud-height: 64px;
+}
+
+body {
+  @apply bg-slate-950 text-slate-100;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Custom scrollbar styles */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.3);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.5);
+}
+
+/* ECG stroke animation for top bar */
+.ecg-stroke {
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  animation: ecg-draw 2.4s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(52,211,153,0.7));
+}
+
+@keyframes ecg-draw {
+  0% { stroke-dashoffset: 200; }
+  60% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -200; }
+}
+
+/* Glowing accuracy fill */
+.accuracy-fill {
+  background: linear-gradient(90deg, rgba(16,185,129,0.8), rgba(59,130,246,0.8));
+  box-shadow: 0 0 12px rgba(16,185,129,0.6), 0 0 18px rgba(59,130,246,0.4);
+  animation: accuracyGlow 2.2s ease-in-out infinite alternate;
+}
+
+@keyframes accuracyGlow {
+  from { filter: drop-shadow(0 0 6px rgba(16,185,129,0.7)); }
+  to { filter: drop-shadow(0 0 12px rgba(59,130,246,0.8)); }
+}
