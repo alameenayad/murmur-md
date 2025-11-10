@@ -233,16 +233,32 @@ export default function App() {
 }
 
 function Intro({ onBegin }: { onBegin: () => void }) {
-  const slides = [
+  // Desktop, landscape-friendly
+  const desktopSlides = [
     'https://images.unsplash.com/photo-1584982751601-97dcc096659c?q=80&w=1600&auto=format&fit=crop',
     'https://images.unsplash.com/photo-1581089781785-603411fa81e5?q=80&w=1600&auto=format&fit=crop',
     'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?q=80&w=1600&auto=format&fit=crop',
   ]
+  // Mobile, portrait-friendly
+  const mobileSlides = [
+    'https://images.unsplash.com/photo-1550831107-1553da8c8464?q=80&w=800&h=1400&fit=crop&auto=format', // stethoscope portrait
+    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=800&h=1400&fit=crop&auto=format', // clinician on phone portrait
+    'https://images.unsplash.com/photo-1584433144859-1fc3ab64a957?q=80&w=800&h=1400&fit=crop&auto=format', // hospital corridor portrait
+  ]
+  const [isMobile, setIsMobile] = useState(false)
+  const slides = isMobile ? mobileSlides : desktopSlides
   const [idx, setIdx] = useState(0)
+  useEffect(()=>{
+    const mq = window.matchMedia('(max-width: 640px)')
+    const set = () => setIsMobile(mq.matches)
+    set()
+    mq.addEventListener?.('change', set)
+    return () => mq.removeEventListener?.('change', set)
+  },[])
   useEffect(()=>{
     const id = setInterval(()=> setIdx(i => (i+1)%slides.length), 4000)
     return ()=> clearInterval(id)
-  },[])
+  },[slides.length])
   return (
     <div className="h-full min-h-[calc(100svh-3rem)] sm:min-h-0 relative overflow-hidden">
       <div className="absolute inset-0">
@@ -251,9 +267,11 @@ function Intro({ onBegin }: { onBegin: () => void }) {
         </AnimatePresence>
       </div>
       <div className="relative h-full grid place-items-center bg-black/40">
-        <div className="mx-auto max-w-2xl text-center px-4 sm:px-6">
+        <div className="mx-auto max-w-xl sm:max-w-2xl text-center px-4 sm:px-6">
           <h1 className="text-2xl sm:text-4xl font-bold mb-3 leading-tight">Welcome to Your Cardiology Rotation</h1>
-          <p className="text-slate-200 mb-6 sm:mb-8 text-sm sm:text-base leading-relaxed">A POV simulator guided by your Senior Registrar. Earn your highest Diagnostic Accuracy.</p>
+          <p className="text-slate-200 mb-6 sm:mb-8 text-sm sm:text-base leading-relaxed">
+            A POV simulator guided by your Senior Registrar. Earn your highest Diagnostic Accuracy.
+          </p>
           <button onClick={onBegin} className="px-4 py-2 sm:px-6 sm:py-3 rounded-md bg-emerald-500/90 text-slate-900 font-semibold hover:bg-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.35)] text-sm sm:text-base">Begin Shift</button>
         </div>
       </div>
@@ -530,7 +548,7 @@ const congenitalCases: Case[] = [
   { id: 'chd-9', title: 'CHD Case 9', patientName: 'Mia Novak', age: 7, sex: 'F', vignette: '7-year-old girl, normal growth and development, no symptoms. Normal heart action and pulses. Routine examination. You listen at the left sternal edge, 4th interspace.', options: ['Ventricular septal defect','Atrial septal defect','Patent ductus arteriosus','Mitral regurgitation'], correctIndex: 0, audio: '/assets/audio/9-VSD.mp3', feedbackCorrect: 'Correct: Ventricular septal defect—harsh holosystolic murmur at the left lower sternal edge; often palpable thrill.', feedbackWrong: 'Hint: Holosystolic timing at the left lower sternal border is typical for ventricular septal defect; palpate for a thrill to support the diagnosis.' },
 ]
 
-function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, onStop }: { onNext: () => void, onPrev: () => void, setAccuracy: Dispatch<SetStateAction<number>>, accuracy: number, stethoscopeOn: boolean, onPlay: (src: string)=>void, onStop: () => void }) {
+function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, onStop }: { onNext: () => void, onPrev: () => void, setAccuracy: Dispatch<SetStateAction<number>>, accuracy: number, stethoscopeOn: boolean, onPlay: (src: string | string[])=>void, onStop: () => void }) {
   const deck = congenitalCases
   const [idx, setIdx] = useState(0)
   const [selected, setSelected] = useState<number|null>(null)
@@ -656,7 +674,7 @@ function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
               </button>
             </div>
             <div className="flex items-center gap-2 mb-4">
-              <button disabled={!stethoscopeOn || !current.audio} onClick={()=> current.audio && onPlay(current.audio)} className={`px-3 py-1.5 rounded-md ${stethoscopeOn? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200':'bg-white/10 text-slate-300 opacity-60'} `}>🔊 Listen</button>
+              <button disabled={!stethoscopeOn || !current.audio} onClick={()=> current.audio && onPlay([current.audio, current.audio.replace(/^\/assets\/audio\//,'/audio/'), current.audio.replace(/^\/assets\//,'/')])} className={`px-3 py-1.5 rounded-md ${stethoscopeOn? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200':'bg-white/10 text-slate-300 opacity-60'} `}>🔊 Listen</button>
               {!stethoscopeOn && <span className="text-amber-300 text-xs">Equip stethoscope to enable listening</span>}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -774,7 +792,7 @@ function References() {
   )
 }
 
-function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, onStop }: { onNext: () => void, onPrev: () => void, setAccuracy: Dispatch<SetStateAction<number>>, accuracy: number, stethoscopeOn: boolean, onPlay: (src: string)=>void, onStop: () => void }) {
+function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, onStop }: { onNext: () => void, onPrev: () => void, setAccuracy: Dispatch<SetStateAction<number>>, accuracy: number, stethoscopeOn: boolean, onPlay: (src: string | string[])=>void, onStop: () => void }) {
   const deck = adultCases
   const [idx, setIdx] = useState(0)
   const [selected, setSelected] = useState<number|null>(null)
@@ -902,7 +920,7 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
               </button>
             </div>
             <div className="flex items-center gap-2 mb-4">
-              <button disabled={!stethoscopeOn || !current.audio} onClick={()=> current.audio && onPlay(current.audio)} className={`px-3 py-1.5 rounded-md ${stethoscopeOn? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200':'bg-white/10 text-slate-300 opacity-60'} `}>🔊 Listen</button>
+              <button disabled={!stethoscopeOn || !current.audio} onClick={()=> current.audio && onPlay([current.audio, current.audio.replace(/^\/assets\/audio\//,'/audio/'), current.audio.replace(/^\/assets\//,'/')])} className={`px-3 py-1.5 rounded-md ${stethoscopeOn? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200':'bg-white/10 text-slate-300 opacity-60'} `}>🔊 Listen</button>
               {!stethoscopeOn && <span className="text-amber-300 text-xs">Equip stethoscope to enable listening</span>}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
