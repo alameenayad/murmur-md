@@ -81,7 +81,7 @@ export default function App() {
           {/* Desktop collapse toggle inside sidebar container */}
           <button
             onClick={()=>setDesktopNavCollapsed(v=>!v)}
-            className="hidden sm:inline-flex items-center justify-center p-2 rounded-md border border-white/10 hover:bg-white/10 absolute top-2 right-2"
+            className="hidden sm:inline-flex items-center justify-center p-2 rounded-md border border-white/10 hover:bg-white/10 absolute top-2 right-4"
             aria-label="Toggle sidebar"
             title="Toggle sidebar"
           >
@@ -95,7 +95,7 @@ export default function App() {
               </>
             )}
           </div>
-          <nav className="flex-1 flex flex-col gap-2 text-sm">
+          <nav className="flex-1 flex flex-col gap-3 text-sm">
             <SidebarItem collapsed={desktopNavCollapsed} label="Start Shift" active={scene==='intro'} onClick={()=>goto(0)} icon={<FiActivity />} />
             <SidebarItem collapsed={desktopNavCollapsed} label="Skills Lab" active={scene==='skills'} onClick={()=>goto(1)} icon={<TbStethoscope />} />
             <SidebarItem collapsed={desktopNavCollapsed} label="Ward Round" active={scene==='ward'} onClick={()=>goto(2)} icon={<FiFolder />} />
@@ -1137,7 +1137,7 @@ function Mentor({ text }: { text: string }) {
 
 function SidebarItem({ label, active, onClick, icon, collapsed }: { label: string, active?: boolean, onClick?: ()=>void, icon?: React.ReactNode, collapsed?: boolean }) {
   return (
-    <button onClick={onClick} className={`flex ${collapsed ? 'justify-center' : 'items-center gap-2'} px-2 sm:px-3 py-2 rounded-md text-left ${active ? 'bg-emerald-500/10 border border-emerald-400/30 text-emerald-300' : 'hover:bg-white/5 border border-transparent'}`}>
+    <button onClick={onClick} className={`flex ${collapsed ? 'justify-center' : 'items-center gap-2'} px-2 sm:px-3 ${collapsed ? 'py-3' : 'py-2'} rounded-md text-left ${active ? 'bg-emerald-500/10 border border-emerald-400/30 text-emerald-300' : 'hover:bg-white/5 border border-transparent'}`}>
       <span className="text-emerald-300 text-lg">{icon}</span>
       {!collapsed && <span>{label}</span>}
     </button>
