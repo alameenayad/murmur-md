@@ -249,12 +249,12 @@ export default function App() {
 function Intro({ onBegin }: { onBegin: () => void }) {
   // Desktop, landscape-friendly
   const desktopSlides = [
-    // Stethoscope on ECG paper
-    'https://images.unsplash.com/photo-1511174511562-5f7f18b874f8?q=80&w=1600&auto=format&fit=crop',
-    // ECG/monitoring environment
-    'https://images.unsplash.com/photo-1516549655169-df83a077451f?q=80&w=1600&auto=format&fit=crop',
-    // Heart/clinical setup
-    'https://images.unsplash.com/photo-1516542076529-1ea3854896e1?q=80&w=1600&auto=format&fit=crop',
+    // Stethoscope on ECG paper (reliable Unsplash with standard params)
+    'https://images.unsplash.com/photo-1511174511562-5f7f18b874f8?ixlib=rb-4.0.3&q=80&auto=format&fit=crop&w=1600',
+    // Close-up medical monitor/ECG lines
+    'https://images.unsplash.com/photo-1584982751601-97dcc096659c?ixlib=rb-4.0.3&q=80&auto=format&fit=crop&w=1600',
+    // Cardiology workbench / stethoscope and clipboard
+    'https://images.unsplash.com/photo-1581594693700-22d3b1a9e5a1?ixlib=rb-4.0.3&q=80&auto=format&fit=crop&w=1600',
   ]
   // Mobile, portrait-friendly
   const mobileSlides = [
@@ -307,6 +307,7 @@ function Intro({ onBegin }: { onBegin: () => void }) {
             transition={{ duration: 0.8 }}
             loading="eager"
             decoding="async"
+            referrerPolicy="no-referrer"
             onError={(e)=>{ (e.currentTarget as HTMLImageElement).src = isMobile
               ? 'https://images.unsplash.com/photo-1511174511562-5f7f18b874f8?q=80&w=1000&auto=format&fit=crop'
               : 'https://images.unsplash.com/photo-1511174511562-5f7f18b874f8?q=80&w=1600&auto=format&fit=crop'
