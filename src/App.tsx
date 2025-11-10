@@ -241,9 +241,12 @@ function Intro({ onBegin }: { onBegin: () => void }) {
   ]
   // Mobile, portrait-friendly
   const mobileSlides = [
-    'https://images.unsplash.com/photo-1550831107-1553da8c8464?q=80&w=800&h=1400&fit=crop&auto=format', // stethoscope portrait
-    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=800&h=1400&fit=crop&auto=format', // clinician on phone portrait
-    'https://images.unsplash.com/photo-1584433144859-1fc3ab64a957?q=80&w=800&h=1400&fit=crop&auto=format', // hospital corridor portrait
+    // Heart surgeon (keep)
+    'https://images.unsplash.com/photo-1580281657521-6a9b67e78f0f?q=80&w=800&h=1400&fit=crop&auto=format',
+    // Echocardiogram/monitoring vibe (cardiology context)
+    'https://images.unsplash.com/photo-1581594693700-22d3b1a9e5a1?q=80&w=800&h=1400&fit=crop&auto=format',
+    // Cardiologist with stethoscope (portrait)
+    'https://images.unsplash.com/photo-1550831107-1553da8c8464?q=80&w=800&h=1400&fit=crop&auto=format',
   ]
   const [isMobile, setIsMobile] = useState(false)
   const slides = isMobile ? mobileSlides : desktopSlides
@@ -266,7 +269,7 @@ function Intro({ onBegin }: { onBegin: () => void }) {
           <motion.img key={idx} src={slides[idx]} className="w-full h-full object-cover" initial={{ opacity: 0, scale: 1.04 }} animate={{ opacity: 0.85, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.8 }} />
         </AnimatePresence>
       </div>
-      <div className="relative h-full grid place-items-center bg-black/40">
+      <div className="relative h-full flex sm:grid items-center sm:place-items-center justify-end sm:justify-center bg-black/40 pb-16 sm:pb-0">
         <div className="mx-auto max-w-xl sm:max-w-2xl text-center px-4 sm:px-6">
           <h1 className="text-2xl sm:text-4xl font-bold mb-3 leading-tight">Welcome to Your Cardiology Rotation</h1>
           <p className="text-slate-200 mb-6 sm:mb-8 text-sm sm:text-base leading-relaxed">
