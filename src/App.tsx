@@ -249,18 +249,21 @@ export default function App() {
 function Intro({ onBegin }: { onBegin: () => void }) {
   // Desktop, landscape-friendly
   const desktopSlides = [
-    'https://images.unsplash.com/photo-1584982751601-97dcc096659c?q=80&w=1600&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1581089781785-603411fa81e5?q=80&w=1600&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?q=80&w=1600&auto=format&fit=crop',
+    // Stethoscope on ECG paper
+    'https://images.unsplash.com/photo-1511174511562-5f7f18b874f8?q=80&w=1600&auto=format&fit=crop',
+    // ECG/monitoring environment
+    'https://images.unsplash.com/photo-1516549655169-df83a077451f?q=80&w=1600&auto=format&fit=crop',
+    // Heart/clinical setup
+    'https://images.unsplash.com/photo-1516542076529-1ea3854896e1?q=80&w=1600&auto=format&fit=crop',
   ]
   // Mobile, portrait-friendly
   const mobileSlides = [
-    // Heart surgeon (keep)
-    'https://images.unsplash.com/photo-1580281657521-6a9b67e78f0f?q=80&w=800&h=1400&fit=crop&auto=format',
-    // Echocardiogram/monitoring vibe (cardiology context)
-    'https://images.unsplash.com/photo-1581594693700-22d3b1a9e5a1?q=80&w=800&h=1400&fit=crop&auto=format',
-    // Cardiologist with stethoscope (portrait)
-    'https://images.unsplash.com/photo-1550831107-1553da8c8464?q=80&w=800&h=1400&fit=crop&auto=format',
+    // Heart surgeon portrait
+    'https://images.unsplash.com/photo-1580281657521-6a9b67e78f0f?q=80&w=1000&auto=format&fit=crop',
+    // Stethoscope close-up portrait crop
+    'https://images.unsplash.com/photo-1511174511562-5f7f18b874f8?q=80&w=1000&auto=format&fit=crop',
+    // Clinical monitor/ECG portrait crop
+    'https://images.unsplash.com/photo-1516549655169-df83a077451f?q=80&w=1000&auto=format&fit=crop',
   ]
   const [isMobile, setIsMobile] = useState(false)
   const slides = isMobile ? mobileSlides : desktopSlides
@@ -294,10 +297,24 @@ function Intro({ onBegin }: { onBegin: () => void }) {
     <div className="h-full min-h-[calc(100svh-3rem)] sm:min-h-0 relative overflow-hidden">
       <div className="absolute inset-0">
         <AnimatePresence mode="sync">
-          <motion.img key={`${isMobile? 'm':'d'}-${idx}`} src={slides[idx]} className="w-full h-full object-cover" initial={{ opacity: 0, scale: 1.04 }} animate={{ opacity: 0.85, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.8 }} />
+          <motion.img
+            key={`${isMobile? 'm':'d'}-${idx}`}
+            src={slides[idx]}
+            className="w-full h-full object-cover"
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={{ opacity: 0.85, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+            loading="eager"
+            decoding="async"
+            onError={(e)=>{ (e.currentTarget as HTMLImageElement).src = isMobile
+              ? 'https://images.unsplash.com/photo-1511174511562-5f7f18b874f8?q=80&w=1000&auto=format&fit=crop'
+              : 'https://images.unsplash.com/photo-1511174511562-5f7f18b874f8?q=80&w=1600&auto=format&fit=crop'
+            }}
+          />
         </AnimatePresence>
       </div>
-      <div className="relative h-full grid place-items-center bg-black/40 pt-14 pb-10 sm:pt-0 sm:pb-0">
+      <div className="relative h-full flex items-end sm:grid sm:place-items-center bg-black/40 pt-10 pb-24 sm:pt-0 sm:pb-0">
         <div className="mx-auto max-w-xl sm:max-w-2xl text-center px-4 sm:px-6">
           <h1 className="text-2xl sm:text-4xl font-bold mb-3 leading-tight">Welcome to Your Cardiology Rotation</h1>
           <p className="text-slate-200 mb-6 sm:mb-8 text-sm sm:text-base leading-relaxed">
@@ -556,14 +573,15 @@ const adultCases: Case[] = [
   {
     id: 'adult-8',
     title: 'Adult Case 8',
-    patientName: 'Isra',
+    patientName: 'Molly Citrus',
     age: 19,
     sex: 'F',
-    vignette: `19-year-old female photographing her red house. She spots a cat, runs after it, and suddenly collapses. No prior medical history; occasional brief palpitations in the past. Family history notable for a cousin with 'heart problems' in youth. On exam: normal pulses, no focal neurology post-recovery. Required listening revealed a harsh crescendo–decrescendo systolic murmur along the left sternal border that increases with Valsalva/standing and decreases with squatting—suggestive of dynamic LVOT obstruction.`,
-    options: ['Hypertrophic obstructive cardiomyopathy','Aortic stenosis','Mitral valve prolapse','Pulmonary embolism'],
+    vignette: `19-year-old woman with brief palpitations after climbing stairs. Otherwise well; no chest pain or syncope. Vitals normal. Cardiac exam at the apex reveals a midsystolic click followed by a late systolic murmur that becomes louder with standing and softer with squatting. Listen carefully at the apical area.`,
+    options: ['Mitral valve prolapse with mitral regurgitation','Innocent flow murmur','Ventricular septal defect','Aortic stenosis'],
     correctIndex: 0,
-    feedbackCorrect: 'Correct: Exertional syncope in a young person with a dynamic systolic murmur that increases with Valsalva is classic for hypertrophic obstructive cardiomyopathy.',
-    feedbackWrong: 'Hint: Dynamic murmurs that increase with Valsalva/standing and decrease with squatting point away from fixed outflow lesions and toward HOCM.',
+    audio: '/assets/audio/adultCASE6.mp3',
+    feedbackCorrect: 'Correct: MVP with MR—midsystolic click followed by a late systolic murmur at the apex; intensity increases with standing (↓ preload).',
+    feedbackWrong: 'Hint: A click followed by a late systolic murmur at the apex that changes with preload supports mitral valve prolapse with regurgitation.',
   },
 ]
 
