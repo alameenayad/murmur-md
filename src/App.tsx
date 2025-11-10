@@ -253,10 +253,24 @@ function Intro({ onBegin }: { onBegin: () => void }) {
   const [idx, setIdx] = useState(0)
   useEffect(()=>{
     const mq = window.matchMedia('(max-width: 640px)')
-    const set = () => setIsMobile(mq.matches)
-    set()
-    mq.addEventListener?.('change', set)
-    return () => mq.removeEventListener?.('change', set)
+    const handler = () => setIsMobile(mq.matches)
+    handler()
+    if (typeof mq.addEventListener === 'function') {
+      mq.addEventListener('change', handler)
+    } else if (typeof (mq as any).addListener === 'function') {
+      ;(mq as any).addListener(handler)
+    }
+    window.addEventListener('resize', handler)
+    window.addEventListener('orientationchange', handler)
+    return () => {
+      if (typeof mq.removeEventListener === 'function') {
+        mq.removeEventListener('change', handler)
+      } else if (typeof (mq as any).removeListener === 'function') {
+        ;(mq as any).removeListener(handler)
+      }
+      window.removeEventListener('resize', handler)
+      window.removeEventListener('orientationchange', handler)
+    }
   },[])
   useEffect(()=>{
     const id = setInterval(()=> setIdx(i => (i+1)%slides.length), 4000)
@@ -266,10 +280,10 @@ function Intro({ onBegin }: { onBegin: () => void }) {
     <div className="h-full min-h-[calc(100svh-3rem)] sm:min-h-0 relative overflow-hidden">
       <div className="absolute inset-0">
         <AnimatePresence mode="sync">
-          <motion.img key={idx} src={slides[idx]} className="w-full h-full object-cover" initial={{ opacity: 0, scale: 1.04 }} animate={{ opacity: 0.85, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.8 }} />
+          <motion.img key={`${isMobile? 'm':'d'}-${idx}`} src={slides[idx]} className="w-full h-full object-cover" initial={{ opacity: 0, scale: 1.04 }} animate={{ opacity: 0.85, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.8 }} />
         </AnimatePresence>
       </div>
-      <div className="relative h-full flex sm:grid items-center sm:place-items-center justify-end sm:justify-center bg-black/40 pb-16 sm:pb-0">
+      <div className="relative h-full grid place-items-center bg-black/40 pt-14 pb-10 sm:pt-0 sm:pb-0">
         <div className="mx-auto max-w-xl sm:max-w-2xl text-center px-4 sm:px-6">
           <h1 className="text-2xl sm:text-4xl font-bold mb-3 leading-tight">Welcome to Your Cardiology Rotation</h1>
           <p className="text-slate-200 mb-6 sm:mb-8 text-sm sm:text-base leading-relaxed">
