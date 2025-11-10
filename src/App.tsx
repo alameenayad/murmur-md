@@ -88,8 +88,12 @@ export default function App() {
             {desktopNavCollapsed ? <FiMenu /> : <FiX />}
           </button>
           <div className={`flex items-center ${desktopNavCollapsed ? 'justify-center' : 'gap-2'} text-lg font-semibold`}>
-            <FiActivity className="text-emerald-400" />
-            {!desktopNavCollapsed && <>MurmurMD</>}
+            {!desktopNavCollapsed && (
+              <>
+                <FiActivity className="text-emerald-400" />
+                MurmurMD
+              </>
+            )}
           </div>
           <nav className="flex-1 flex flex-col gap-2 text-sm">
             <SidebarItem collapsed={desktopNavCollapsed} label="Start Shift" active={scene==='intro'} onClick={()=>goto(0)} icon={<FiActivity />} />
