@@ -151,31 +151,31 @@ export default function App() {
 
         {/* Main area */}
         <div className="relative h-full overflow-hidden">
-          <div className="h-14 px-3 sm:px-6 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-emerald-500/10 to-sky-500/10">
+          <div className="h-12 sm:h-14 px-2 sm:px-6 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-emerald-500/10 to-sky-500/10">
             <div className="flex items-center gap-2">
               <button
                 onClick={()=>setMobileNavOpen(true)}
-                className="sm:hidden inline-flex items-center justify-center px-2 py-1.5 rounded-md border border-white/10 hover:bg-white/10"
+                className="sm:hidden inline-flex items-center justify-center p-2 rounded-md border border-white/10 hover:bg-white/10"
                 aria-label="Open navigation"
               >
                 <FiMenu />
               </button>
               <div className="font-semibold opacity-90">{title}</div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <ECGBar />
-              <button onClick={()=>setStethoscopeOn(v=>!v)} className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md border ${stethoscopeOn? 'border-emerald-400 text-emerald-300 bg-emerald-500/10 animate-pulse': 'border-white/10 hover:bg-white/10'}`}>
+              <button onClick={()=>setStethoscopeOn(v=>!v)} className={`inline-flex items-center gap-1.5 sm:gap-2 px-2 py-1 sm:px-3 sm:py-1.5 rounded-md border text-xs sm:text-sm ${stethoscopeOn? 'border-emerald-400 text-emerald-300 bg-emerald-500/10 animate-pulse': 'border-white/10 hover:bg-white/10'}`}>
                 <span className={`w-2 h-2 rounded-full ${stethoscopeOn? 'bg-emerald-400 shadow-[0_0_12px_#34d399]':'bg-slate-400'}`} />
-                <TbStethoscope /> Equip
+                <TbStethoscope /> <span className="hidden xs:inline sm:inline">Equip</span>
               </button>
               <div className="flex items-center gap-2">
-                <button onClick={prev} disabled={sceneIndex===0} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/5 hover:bg-white/10 disabled:opacity-40"><FiArrowLeft/>Back</button>
-                <button onClick={next} disabled={sceneIndex===scenes.length-1} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-emerald-500/90 text-slate-900 font-semibold hover:bg-emerald-400 disabled:opacity-40">Next<FiArrowRight/></button>
+                <button onClick={prev} disabled={sceneIndex===0} className="inline-flex items-center gap-1.5 sm:gap-2 px-2 py-1 sm:px-3 sm:py-1.5 rounded-md bg-white/5 hover:bg-white/10 disabled:opacity-40 text-xs sm:text-sm"><FiArrowLeft/><span className="hidden xs:inline sm:inline">Back</span></button>
+                <button onClick={next} disabled={sceneIndex===scenes.length-1} className="inline-flex items-center gap-1.5 sm:gap-2 px-2 py-1 sm:px-3 sm:py-1.5 rounded-md bg-emerald-500/90 text-slate-900 font-semibold hover:bg-emerald-400 disabled:opacity-40 text-xs sm:text-sm"><span className="hidden xs:inline sm:inline">Next</span><FiArrowRight/></button>
               </div>
             </div>
           </div>
 
-          <div className="h-[calc(100%-3.5rem)] min-h-0">
+          <div className="min-h-[calc(100svh-3rem)] sm:h-[calc(100%-3.5rem)] min-h-0">
             <AnimatePresence mode="popLayout" initial={false}>
               <motion.section key={scene} variants={variants} initial="enter" animate="center" exit="exit" transition={{ type: 'tween', duration: 0.45 }} className="h-full">
                 {scene === 'intro' && <Intro onBegin={next} />}
@@ -244,17 +244,17 @@ function Intro({ onBegin }: { onBegin: () => void }) {
     return ()=> clearInterval(id)
   },[])
   return (
-    <div className="h-full relative overflow-hidden">
+    <div className="h-full min-h-[calc(100svh-3rem)] sm:min-h-0 relative overflow-hidden">
       <div className="absolute inset-0">
         <AnimatePresence mode="sync">
           <motion.img key={idx} src={slides[idx]} className="w-full h-full object-cover" initial={{ opacity: 0, scale: 1.04 }} animate={{ opacity: 0.85, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.8 }} />
         </AnimatePresence>
       </div>
       <div className="relative h-full grid place-items-center bg-black/40">
-        <div className="mx-auto max-w-2xl text-center px-6">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3">Welcome to Your Cardiology Rotation</h1>
-          <p className="text-slate-200 mb-8">A POV simulator guided by your Senior Registrar. Earn your highest Diagnostic Accuracy.</p>
-          <button onClick={onBegin} className="px-6 py-3 rounded-md bg-emerald-500/90 text-slate-900 font-semibold hover:bg-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.35)]">Begin Shift</button>
+        <div className="mx-auto max-w-2xl text-center px-4 sm:px-6">
+          <h1 className="text-2xl sm:text-4xl font-bold mb-3 leading-tight">Welcome to Your Cardiology Rotation</h1>
+          <p className="text-slate-200 mb-6 sm:mb-8 text-sm sm:text-base leading-relaxed">A POV simulator guided by your Senior Registrar. Earn your highest Diagnostic Accuracy.</p>
+          <button onClick={onBegin} className="px-4 py-2 sm:px-6 sm:py-3 rounded-md bg-emerald-500/90 text-slate-900 font-semibold hover:bg-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.35)] text-sm sm:text-base">Begin Shift</button>
         </div>
       </div>
     </div>
@@ -322,7 +322,7 @@ function Skills({ onNext: _onNext, onPrev: _onPrev, onPlay, openFindings, stetho
 
   return (
     <div className="h-full flex flex-col bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.08),transparent_60%)]">
-      <div className="flex-1 mx-auto max-w-6xl w-full px-6 py-8 grid grid-rows-[auto_1fr] gap-6 min-h-0">
+      <div className="flex-1 mx-auto max-w-6xl w-full px-3 sm:px-6 py-4 sm:py-8 grid grid-rows-[auto_1fr] gap-4 sm:gap-6 min-h-0">
         <Mentor text="Skills Lab orientation: Listen, localize, and identify hallmark features. Use the bell vs diaphragm strategically." />
         <div className="space-y-8 overflow-y-auto pr-1 h-full min-h-0 scroll-smooth">
           <section>
@@ -330,10 +330,10 @@ function Skills({ onNext: _onNext, onPrev: _onPrev, onPlay, openFindings, stetho
               <h3 className="text-emerald-300 font-semibold">Adult Set</h3>
               <span className="text-xs text-slate-400">7 modules</span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
               {adultTraining.map((m) => (
                 <motion.div whileHover={{ y: -4 }} key={m.t} className="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
-                  <div className="h-28 bg-white/5">
+                  <div className="h-24 sm:h-28 bg-white/5">
                     <img src={m.img} alt="" className="w-full h-full object-cover opacity-80" onError={(e)=>{ (e.currentTarget as HTMLImageElement).src = placeholderImg }} />
                   </div>
                   <div className="p-4">
@@ -342,9 +342,9 @@ function Skills({ onNext: _onNext, onPrev: _onPrev, onPlay, openFindings, stetho
                       <button
                         onClick={()=>onPlay([m.src, m.src.replace(/^\/assets\/audio\//,'/audio/'), m.src.replace(/^\/assets\//,'/')])}
                         disabled={!stethoscopeOn || available[m.src]===false}
-                        className={`px-3 py-2 rounded-md ${stethoscopeOn? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200' : 'bg-white/10 text-slate-300 opacity-60'} disabled:opacity-40`}
+                        className={`px-2 py-1.5 sm:px-3 sm:py-2 rounded-md text-sm ${stethoscopeOn? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200' : 'bg-white/10 text-slate-300 opacity-60'} disabled:opacity-40`}
                       >🔊 Listen</button>
-                      <button onClick={()=>openFindings(m.f)} className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/20">Reveal Findings</button>
+                      <button onClick={()=>openFindings(m.f)} className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-md bg-white/10 hover:bg-white/20 text-sm">Reveal Findings</button>
                       {!stethoscopeOn && <span className="text-amber-300 text-xs">Equip stethoscope to enable listening</span>}
                     </div>
                   </div>
@@ -358,10 +358,10 @@ function Skills({ onNext: _onNext, onPrev: _onPrev, onPlay, openFindings, stetho
               <h3 className="text-emerald-300 font-semibold">Paeds Set</h3>
               <span className="text-xs text-slate-400">9 modules</span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
               {pedsTraining.map((m) => (
                 <motion.div whileHover={{ y: -4 }} key={m.t} className="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
-                  <div className="h-28 bg-white/5">
+                  <div className="h-24 sm:h-28 bg-white/5">
                     <img src={m.img} alt="" className="w-full h-full object-cover opacity-80" onError={(e)=>{ (e.currentTarget as HTMLImageElement).src = placeholderImg }} />
                   </div>
                   <div className="p-4">
@@ -370,9 +370,9 @@ function Skills({ onNext: _onNext, onPrev: _onPrev, onPlay, openFindings, stetho
                       <button
                         onClick={()=>onPlay([m.src, m.src.replace(/^\/assets\/audio\//,'/audio/'), m.src.replace(/^\/assets\//,'/')])}
                         disabled={!stethoscopeOn || available[m.src]===false}
-                        className={`px-3 py-2 rounded-md ${stethoscopeOn? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200' : 'bg-white/10 text-slate-300 opacity-60'} disabled:opacity-40`}
+                        className={`px-2 py-1.5 sm:px-3 sm:py-2 rounded-md text-sm ${stethoscopeOn? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200' : 'bg-white/10 text-slate-300 opacity-60'} disabled:opacity-40`}
                       >🔊 Listen</button>
-                      <button onClick={()=>openFindings(m.f)} className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/20">Reveal Findings</button>
+                      <button onClick={()=>openFindings(m.f)} className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-md bg-white/10 hover:bg-white/20 text-sm">Reveal Findings</button>
                       {!stethoscopeOn && <span className="text-amber-300 text-xs">Equip stethoscope to enable listening</span>}
                     </div>
                   </div>
@@ -609,7 +609,24 @@ function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
           <motion.div key={current.id} initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.5 }} className="relative rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
             <div className="text-sm text-slate-300 mb-1">{current.title}</div>
             <div className="text-xs text-slate-400 mb-3">Patient: {current.patientName} · {current.age}y · {current.sex}</div>
-            <p ref={vignetteRef} onMouseUp={handleMouseUpHighlight} className="mb-4">{current.vignette}</p>
+            {/* Vignette with mobile-friendly sentence tap highlighting */}
+            <p ref={vignetteRef} onMouseUp={handleMouseUpHighlight} className="mb-4 select-text">
+              {useMemo(() => (current.vignette.match(/[^.!?]+[.!?]?/g) || [current.vignette]), [current.vignette]).map((s, i) => (
+                <span
+                  key={i}
+                  onClick={()=>{
+                    if (!highlightOn) return
+                    // toggle neon-highlight on this sentence span
+                    const el = document.querySelector(`[data-sent='peds-${i}']`) as HTMLElement|null
+                    (el ?? ({} as any)).classList?.toggle('neon-highlight')
+                  }}
+                  data-sent={`peds-${i}`}
+                  className="cursor-text"
+                >
+                  {s + ' '}
+                </span>
+              ))}
+            </p>
             {/* Floating vertical highlighter controls */}
             <div className="absolute top-3 right-1 z-10 flex flex-col gap-1.5">
               <button
@@ -655,15 +672,15 @@ function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
           )}
           </motion.div>
         </AnimatePresence>
-        <div className="flex items-center justify-between gap-4">
-          <button onClick={prevCase} disabled={isFirst} className="px-4 py-2 rounded-md bg-white/10 hover:bg-white/20 disabled:opacity-40">Previous Patient</button>
-          <div className="flex items-center gap-3 flex-1">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4">
+          <button onClick={prevCase} disabled={isFirst} className="px-3 py-2 sm:px-4 sm:py-2 rounded-md bg-white/10 hover:bg-white/20 disabled:opacity-40 text-sm">Previous Patient</button>
+          <div className="flex items-center gap-3 sm:flex-1">
             <div className="h-3 rounded-full bg-white/10 overflow-hidden flex-1">
               <div className="h-full accuracy-fill" style={{ width: `${accuracy}%` }} />
             </div>
             <div className="text-sm text-slate-300 w-14 text-right">{accuracy}%</div>
           </div>
-          <button onClick={nextCase} className="px-4 py-2 rounded-md bg-emerald-500/90 text-slate-900 font-semibold hover:bg-emerald-400">{isLast ? 'Finish Ward' : 'Next Patient'}</button>
+          <button onClick={nextCase} className="px-3 py-2 sm:px-4 sm:py-2 rounded-md bg-emerald-500/90 text-slate-900 font-semibold hover:bg-emerald-400 text-sm">{isLast ? 'Finish Ward' : 'Next Patient'}</button>
         </div>
       </div>
     </div>
@@ -828,7 +845,23 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
           <motion.div key={current.id} initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.5 }} className="relative rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
             <div className="text-sm text-slate-300 mb-1">{current.title}</div>
             <div className="text-xs text-slate-400 mb-3">Patient: {current.patientName} · {current.age}y · {current.sex}</div>
-            <p ref={vignetteRef} onMouseUp={handleMouseUpHighlight} className="mb-4">{current.vignette}</p>
+            {/* Vignette with mobile-friendly sentence tap highlighting */}
+            <p ref={vignetteRef} onMouseUp={handleMouseUpHighlight} className="mb-4 select-text">
+              {useMemo(() => (current.vignette.match(/[^.!?]+[.!?]?/g) || [current.vignette]), [current.vignette]).map((s, i) => (
+                <span
+                  key={i}
+                  onClick={()=>{
+                    if (!highlightOn) return
+                    const el = document.querySelector(`[data-sent='ward-${i}']`) as HTMLElement|null
+                    (el ?? ({} as any)).classList?.toggle('neon-highlight')
+                  }}
+                  data-sent={`ward-${i}`}
+                  className="cursor-text"
+                >
+                  {s + ' '}
+                </span>
+              ))}
+            </p>
             {/* Floating vertical highlighter controls */}
             <div className="absolute top-3 right-1 z-10 flex flex-col gap-1.5">
               <button
@@ -874,15 +907,15 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
           )}
           </motion.div>
         </AnimatePresence>
-        <div className="flex items-center justify-between gap-4">
-          <button onClick={prevCase} disabled={isFirst} className="px-4 py-2 rounded-md bg-white/10 hover:bg-white/20 disabled:opacity-40">Previous Patient</button>
-          <div className="flex items-center gap-3 flex-1">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4">
+          <button onClick={prevCase} disabled={isFirst} className="px-3 py-2 sm:px-4 sm:py-2 rounded-md bg-white/10 hover:bg-white/20 disabled:opacity-40 text-sm">Previous Patient</button>
+          <div className="flex items-center gap-3 sm:flex-1">
             <div className="h-3 rounded-full bg-white/10 overflow-hidden flex-1">
               <div className="h-full accuracy-fill" style={{ width: `${accuracy}%` }} />
             </div>
             <div className="text-sm text-slate-300 w-14 text-right">{accuracy}%</div>
           </div>
-          <button onClick={nextCase} className="px-4 py-2 rounded-md bg-emerald-500/90 text-slate-900 font-semibold hover:bg-emerald-400">{isLast ? 'Finish Round' : 'Next Patient'}</button>
+          <button onClick={nextCase} className="px-3 py-2 sm:px-4 sm:py-2 rounded-md bg-emerald-500/90 text-slate-900 font-semibold hover:bg-emerald-400 text-sm">{isLast ? 'Finish Round' : 'Next Patient'}</button>
         </div>
       </div>
     </div>
@@ -1042,7 +1075,7 @@ function SidebarItem({ label, active, onClick, icon }: { label: string, active?:
 
 function ECGBar() {
   return (
-    <div className="hidden sm:block h-6 w-40 relative overflow-hidden">
+    <div className="block h-5 w-28 sm:h-6 sm:w-40 relative overflow-hidden">
       <svg viewBox="0 0 200 24" className="absolute inset-0" preserveAspectRatio="none">
         <polyline
           points="0,12 20,12 30,4 40,20 55,12 80,12 90,6 100,18 120,12 150,12 160,4 170,20 180,12 200,12"
