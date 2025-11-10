@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState, useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FiActivity, FiFolder, FiBookOpen, FiArrowLeft, FiArrowRight, FiCheckCircle, FiXCircle, FiPenTool } from 'react-icons/fi'
+import { FiActivity, FiFolder, FiBookOpen, FiArrowLeft, FiArrowRight, FiCheckCircle, FiXCircle, FiPenTool, FiMenu, FiX } from 'react-icons/fi'
 import { LuEraser } from 'react-icons/lu'
 import { TbStethoscope } from 'react-icons/tb'
 
@@ -25,6 +25,7 @@ export default function App() {
   const [findingsOpen, setFindingsOpen] = useState(false)
   const [findingsList, setFindingsList] = useState<string[]>([])
   const [stethoscopeOn, setStethoscopeOn] = useState(false)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   function next() { stop(); setSceneIndex(i => Math.min(i + 1, scenes.length - 1)) }
   function prev() { stop(); setSceneIndex(i => Math.max(i - 1, 0)) }
@@ -72,10 +73,10 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="h-screen grid grid-cols-[240px_1fr]">
-        {/* Sidebar (side-on header) */}
-        <aside className="h-full border-r border-white/10 bg-black/30 backdrop-blur p-4 flex flex-col gap-6">
+    <div className="min-h-[100svh] bg-slate-950 text-slate-100">
+      <div className="h-full sm:h-screen sm:grid sm:grid-cols-[240px_1fr]">
+        {/* Sidebar (desktop) */}
+        <aside className="hidden sm:flex h-full border-r border-white/10 bg-black/30 backdrop-blur p-4 flex-col gap-6">
           <div className="flex items-center gap-2 text-lg font-semibold">
           <FiActivity className="text-emerald-400" />
           MurmurMD
@@ -100,11 +101,67 @@ export default function App() {
             <div className="text-xs text-slate-400">™ Alameen Ayad - Year 2 SSC W1</div>
           </div>
         </aside>
+        {/* Sidebar (mobile drawer) */}
+        <AnimatePresence>
+          {mobileNavOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[45] bg-black/50 sm:hidden"
+              onClick={()=>setMobileNavOpen(false)}
+            />
+          )}
+        </AnimatePresence>
+        <motion.aside
+          initial={false}
+          animate={{ x: mobileNavOpen ? 0 : -280 }}
+          transition={{ type: 'tween', duration: 0.25 }}
+          className="sm:hidden fixed top-0 left-0 z-[50] h-full w-64 border-r border-white/10 bg-black/80 backdrop-blur p-4 flex flex-col gap-6"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-lg font-semibold">
+              <FiActivity className="text-emerald-400" />
+              MurmurMD
+            </div>
+            <button onClick={()=>setMobileNavOpen(false)} className="p-2 rounded-md border border-white/10 hover:bg-white/10">
+              <FiX />
+            </button>
+          </div>
+          <nav className="flex-1 flex flex-col gap-2 text-sm">
+            <SidebarItem label="Start Shift" active={scene==='intro'} onClick={()=>{goto(0); setMobileNavOpen(false)}} icon={<FiActivity />} />
+            <SidebarItem label="Skills Lab" active={scene==='skills'} onClick={()=>{goto(1); setMobileNavOpen(false)}} icon={<TbStethoscope />} />
+            <SidebarItem label="Ward Round" active={scene==='ward'} onClick={()=>{goto(2); setMobileNavOpen(false)}} icon={<FiFolder />} />
+            <SidebarItem label="Paeds Ward" active={scene==='peds'} onClick={()=>{goto(3); setMobileNavOpen(false)}} icon={<FiFolder />} />
+            <SidebarItem label="Library" active={scene==='library'} onClick={()=>{goto(4); setMobileNavOpen(false)}} icon={<FiBookOpen />} />
+            <SidebarItem label="References" active={scene==='refs'} onClick={()=>{goto(5); setMobileNavOpen(false)}} icon={<FiBookOpen />} />
+          </nav>
+          <div className="mt-auto space-y-4">
+            <div className="w-full grid place-items-center">
+              <img
+                src="/images/cardiff.png"
+                alt="Cardiff University"
+                className="max-w-[70px] opacity-50"
+                onError={(e)=>{ const img = (e.currentTarget as HTMLImageElement); img.onerror = null; img.src = 'https://upload.wikimedia.org/wikipedia/en/f/f7/Cardiff_University_logo.svg' }}
+              />
+            </div>
+            <div className="text-xs text-slate-400">™ Alameen Ayad - Year 2 SSC W1</div>
+          </div>
+        </motion.aside>
 
         {/* Main area */}
         <div className="relative h-full overflow-hidden">
-          <div className="h-14 px-6 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-emerald-500/10 to-sky-500/10">
-            <div className="font-semibold opacity-90">{title}</div>
+          <div className="h-14 px-3 sm:px-6 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-emerald-500/10 to-sky-500/10">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={()=>setMobileNavOpen(true)}
+                className="sm:hidden inline-flex items-center justify-center px-2 py-1.5 rounded-md border border-white/10 hover:bg-white/10"
+                aria-label="Open navigation"
+              >
+                <FiMenu />
+              </button>
+              <div className="font-semibold opacity-90">{title}</div>
+            </div>
             <div className="flex items-center gap-4">
               <ECGBar />
               <button onClick={()=>setStethoscopeOn(v=>!v)} className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md border ${stethoscopeOn? 'border-emerald-400 text-emerald-300 bg-emerald-500/10 animate-pulse': 'border-white/10 hover:bg-white/10'}`}>
