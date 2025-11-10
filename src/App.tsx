@@ -26,6 +26,7 @@ export default function App() {
   const [findingsList, setFindingsList] = useState<string[]>([])
   const [stethoscopeOn, setStethoscopeOn] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  const [desktopNavCollapsed, setDesktopNavCollapsed] = useState(false)
 
   function next() { stop(); setSceneIndex(i => Math.min(i + 1, scenes.length - 1)) }
   function prev() { stop(); setSceneIndex(i => Math.max(i - 1, 0)) }
@@ -74,31 +75,40 @@ export default function App() {
 
   return (
     <div className="min-h-[100svh] bg-slate-950 text-slate-100">
-      <div className="h-full sm:h-screen sm:grid sm:grid-cols-[240px_1fr]">
+      <div className={`h-full sm:h-screen sm:grid ${desktopNavCollapsed ? 'sm:grid-cols-[64px_1fr]' : 'sm:grid-cols-[240px_1fr]'}`}>
         {/* Sidebar (desktop) */}
-        <aside className="hidden sm:flex h-full border-r border-white/10 bg-black/30 backdrop-blur p-4 flex-col gap-6">
-          <div className="flex items-center gap-2 text-lg font-semibold">
-          <FiActivity className="text-emerald-400" />
-          MurmurMD
+        <aside className="hidden sm:flex relative h-full border-r border-white/10 bg-black/30 backdrop-blur p-2 sm:p-4 flex-col gap-4 sm:gap-6">
+          {/* Desktop collapse toggle inside sidebar container */}
+          <button
+            onClick={()=>setDesktopNavCollapsed(v=>!v)}
+            className="hidden sm:inline-flex items-center justify-center p-2 rounded-md border border-white/10 hover:bg-white/10 absolute top-2 right-2"
+            aria-label="Toggle sidebar"
+            title="Toggle sidebar"
+          >
+            {desktopNavCollapsed ? <FiMenu /> : <FiX />}
+          </button>
+          <div className={`flex items-center ${desktopNavCollapsed ? 'justify-center' : 'gap-2'} text-lg font-semibold`}>
+            <FiActivity className="text-emerald-400" />
+            {!desktopNavCollapsed && <>MurmurMD</>}
           </div>
           <nav className="flex-1 flex flex-col gap-2 text-sm">
-            <SidebarItem label="Start Shift" active={scene==='intro'} onClick={()=>goto(0)} icon={<FiActivity />} />
-            <SidebarItem label="Skills Lab" active={scene==='skills'} onClick={()=>goto(1)} icon={<TbStethoscope />} />
-            <SidebarItem label="Ward Round" active={scene==='ward'} onClick={()=>goto(2)} icon={<FiFolder />} />
-            <SidebarItem label="Paeds Ward" active={scene==='peds'} onClick={()=>goto(3)} icon={<FiFolder />} />
-            <SidebarItem label="Library" active={scene==='library'} onClick={()=>goto(4)} icon={<FiBookOpen />} />
-            <SidebarItem label="References" active={scene==='refs'} onClick={()=>goto(5)} icon={<FiBookOpen />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Start Shift" active={scene==='intro'} onClick={()=>goto(0)} icon={<FiActivity />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Skills Lab" active={scene==='skills'} onClick={()=>goto(1)} icon={<TbStethoscope />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Ward Round" active={scene==='ward'} onClick={()=>goto(2)} icon={<FiFolder />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Paeds Ward" active={scene==='peds'} onClick={()=>goto(3)} icon={<FiFolder />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Library" active={scene==='library'} onClick={()=>goto(4)} icon={<FiBookOpen />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="References" active={scene==='refs'} onClick={()=>goto(5)} icon={<FiBookOpen />} />
           </nav>
           <div className="mt-auto space-y-4">
             <div className="w-full grid place-items-center">
               <img
                 src="/images/cardiff.png"
                 alt="Cardiff University"
-                className="max-w-[70px] opacity-40"
+                className={`${desktopNavCollapsed ? 'max-w-[36px]' : 'max-w-[70px]'} opacity-40`}
                 onError={(e)=>{ const img = (e.currentTarget as HTMLImageElement); img.onerror = null; img.src = 'https://upload.wikimedia.org/wikipedia/en/f/f7/Cardiff_University_logo.svg' }}
               />
             </div>
-            <div className="text-xs text-slate-400">™ Alameen Ayad - Year 2 SSC W1</div>
+            {!desktopNavCollapsed && <div className="text-xs text-slate-400">™ Alameen Ayad - Year 2 SSC W1</div>}
           </div>
         </aside>
         {/* Sidebar (mobile drawer) */}
@@ -673,21 +683,21 @@ function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
                 </span>
               ))}
             </p>
-            {/* Floating vertical highlighter controls */}
-            <div className="absolute top-3 right-1 z-10 flex flex-col gap-1.5">
-              <button
-                onClick={()=> setHighlightOn(v=>!v)}
-                className={`px-1.5 py-1.5 rounded-md border ${highlightOn ? 'border-cyan-400 bg-cyan-500/10 text-cyan-200 shadow-[0_0_8px_rgba(56,189,248,0.5)]' : 'border-white/10 bg-white/0 hover:bg-white/5 text-slate-200'}`}
-                title="Toggle highlighter"
-              >
-                <FiPenTool size={16} />
-              </button>
+            {/* Highlight controls - horizontal row, eraser left of pen */}
+            <div className="absolute top-3 right-1 z-10 flex flex-row gap-1.5">
               <button
                 onClick={clearHighlights}
                 className="px-1.5 py-1.5 rounded-md border border-white/10 bg-white/0 hover:bg-white/5 text-slate-200"
                 title="Clear highlights"
               >
                 <LuEraser size={16} />
+              </button>
+              <button
+                onClick={()=> setHighlightOn(v=>!v)}
+                className={`px-1.5 py-1.5 rounded-md border ${highlightOn ? 'border-cyan-400 bg-cyan-500/10 text-cyan-200 shadow-[0_0_8px_rgba(56,189,248,0.5)]' : 'border-white/10 bg-white/0 hover:bg-white/5 text-slate-200'}`}
+                title="Toggle highlighter"
+              >
+                <FiPenTool size={16} />
               </button>
             </div>
             <div className="flex items-center gap-2 mb-4">
@@ -919,21 +929,21 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
                 </span>
               ))}
             </p>
-            {/* Floating vertical highlighter controls */}
-            <div className="absolute top-3 right-1 z-10 flex flex-col gap-1.5">
-              <button
-                onClick={()=> setHighlightOn(v=>!v)}
-                className={`px-1.5 py-1.5 rounded-md border ${highlightOn ? 'border-cyan-400 bg-cyan-500/10 text-cyan-200 shadow-[0_0_8px_rgba(56,189,248,0.5)]' : 'border-white/10 bg-white/0 hover:bg-white/5 text-slate-200'}`}
-                title="Toggle highlighter"
-              >
-                <FiPenTool size={16} />
-              </button>
+            {/* Highlight controls - horizontal row, eraser left of pen */}
+            <div className="absolute top-3 right-1 z-10 flex flex-row gap-1.5">
               <button
                 onClick={clearHighlights}
                 className="px-1.5 py-1.5 rounded-md border border-white/10 bg-white/0 hover:bg-white/5 text-slate-200"
                 title="Clear highlights"
               >
                 <LuEraser size={16} />
+              </button>
+              <button
+                onClick={()=> setHighlightOn(v=>!v)}
+                className={`px-1.5 py-1.5 rounded-md border ${highlightOn ? 'border-cyan-400 bg-cyan-500/10 text-cyan-200 shadow-[0_0_8px_rgba(56,189,248,0.5)]' : 'border-white/10 bg-white/0 hover:bg-white/5 text-slate-200'}`}
+                title="Toggle highlighter"
+              >
+                <FiPenTool size={16} />
               </button>
             </div>
             <div className="flex items-center gap-2 mb-4">
@@ -1121,11 +1131,11 @@ function Mentor({ text }: { text: string }) {
   )
 }
 
-function SidebarItem({ label, active, onClick, icon }: { label: string, active?: boolean, onClick?: ()=>void, icon?: React.ReactNode }) {
+function SidebarItem({ label, active, onClick, icon, collapsed }: { label: string, active?: boolean, onClick?: ()=>void, icon?: React.ReactNode, collapsed?: boolean }) {
   return (
-    <button onClick={onClick} className={`flex items-center gap-2 px-3 py-2 rounded-md text-left ${active ? 'bg-emerald-500/10 border border-emerald-400/30 text-emerald-300' : 'hover:bg-white/5 border border-transparent'}`}>
-      <span className="text-emerald-300">{icon}</span>
-      <span>{label}</span>
+    <button onClick={onClick} className={`flex ${collapsed ? 'justify-center' : 'items-center gap-2'} px-2 sm:px-3 py-2 rounded-md text-left ${active ? 'bg-emerald-500/10 border border-emerald-400/30 text-emerald-300' : 'hover:bg-white/5 border border-transparent'}`}>
+      <span className="text-emerald-300 text-lg">{icon}</span>
+      {!collapsed && <span>{label}</span>}
     </button>
   )
 }
