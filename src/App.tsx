@@ -257,14 +257,7 @@ function Intro({ onBegin }: { onBegin: () => void }) {
     'https://images.unsplash.com/photo-1581594693700-22d3b1a9e5a1?ixlib=rb-4.0.3&q=80&auto=format&fit=crop&w=1600',
   ]
   // Mobile, portrait-friendly
-  const mobileSlides = [
-    // Heart surgeon portrait
-    'https://images.unsplash.com/photo-1580281657521-6a9b67e78f0f?q=80&w=1000&auto=format&fit=crop',
-    // Stethoscope close-up portrait crop
-    'https://images.unsplash.com/photo-1511174511562-5f7f18b874f8?q=80&w=1000&auto=format&fit=crop',
-    // Clinical monitor/ECG portrait crop
-    'https://images.unsplash.com/photo-1516549655169-df83a077451f?q=80&w=1000&auto=format&fit=crop',
-  ]
+  const mobileSlides = desktopSlides
   const [isMobile, setIsMobile] = useState(false)
   const slides = isMobile ? mobileSlides : desktopSlides
   const [idx, setIdx] = useState(0)
