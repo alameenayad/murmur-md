@@ -250,17 +250,23 @@ function Intro({ onBegin }: { onBegin: () => void }) {
   // Desktop, landscape-friendly
   const desktopSlides = [
     // Stethoscope on ECG paper (reliable Unsplash with standard params)
-    'https://images.unsplash.com/photo-1511174511562-5f7f18b874f8?ixlib=rb-4.0.3&q=80&auto=format&fit=crop&w=1600',
+    '/images/hero1.jpg',
     // Close-up medical monitor/ECG lines
-    'https://images.unsplash.com/photo-1584982751601-97dcc096659c?ixlib=rb-4.0.3&q=80&auto=format&fit=crop&w=1600',
+    '/images/hero2.jpg',
     // Cardiology workbench / stethoscope and clipboard
-    'https://images.unsplash.com/photo-1581594693700-22d3b1a9e5a1?ixlib=rb-4.0.3&q=80&auto=format&fit=crop&w=1600',
+    '/images/hero3.jpg',
   ]
   // Mobile, portrait-friendly
   const mobileSlides = desktopSlides
   const [isMobile, setIsMobile] = useState(false)
   const slides = isMobile ? mobileSlides : desktopSlides
   const [idx, setIdx] = useState(0)
+  const heroVariants = {
+    enter: { opacity: 0, scale: 1.04 },
+    center: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: 1.01 },
+  }
+  const heroTransition = { duration: 1.2, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }
   useEffect(()=>{
     const mq = window.matchMedia('(max-width: 640px)')
     const handler = () => setIsMobile(mq.matches)
@@ -289,18 +295,20 @@ function Intro({ onBegin }: { onBegin: () => void }) {
   return (
     <div className="h-full min-h-[calc(100svh-3rem)] sm:min-h-0 relative overflow-hidden">
       <div className="absolute inset-0">
-        <AnimatePresence mode="sync">
+        <AnimatePresence mode="wait">
           <motion.img
             key={`${isMobile? 'm':'d'}-${idx}`}
             src={slides[idx]}
             className="w-full h-full object-cover"
-            initial={{ opacity: 0, scale: 1.04 }}
-            animate={{ opacity: 0.85, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8 }}
+            variants={heroVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={heroTransition}
             loading="eager"
             decoding="async"
             referrerPolicy="no-referrer"
+            style={{ willChange: 'opacity, transform' }}
             onError={(e)=>{ (e.currentTarget as HTMLImageElement).src = isMobile
               ? 'https://images.unsplash.com/photo-1511174511562-5f7f18b874f8?q=80&w=1000&auto=format&fit=crop'
               : 'https://images.unsplash.com/photo-1511174511562-5f7f18b874f8?q=80&w=1600&auto=format&fit=crop'
