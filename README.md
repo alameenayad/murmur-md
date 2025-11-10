@@ -19,7 +19,7 @@ A comprehensive, gamified medical education simulator designed for medical stude
 - **Progress Tracking**: Real-time accuracy scoring with animated feedback
 - **Randomized Answers**: Prevents pattern memorization, forces true learning
 - **Animated Feedback**: Visual and audio feedback for correct/incorrect answers
-- **Mentor Character**: Dr Jeffery Murmur provides guidance throughout
+- **Mentor Character**: Dr. Lubb von Dub provides guidance throughout
 
 ### 🎵 **Audio Integration**
 - **High-Quality Audio**: Real heart sound recordings from University of Washington

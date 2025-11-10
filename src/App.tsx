@@ -1,6 +1,8 @@
 import { useMemo, useRef, useState, useEffect } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FiActivity, FiFolder, FiBookOpen, FiArrowLeft, FiArrowRight, FiCheckCircle, FiXCircle } from 'react-icons/fi'
+import { FiActivity, FiFolder, FiBookOpen, FiArrowLeft, FiArrowRight, FiCheckCircle, FiXCircle, FiPenTool } from 'react-icons/fi'
+import { LuEraser } from 'react-icons/lu'
 import { TbStethoscope } from 'react-icons/tb'
 
 type Scene = 'intro' | 'skills' | 'ward' | 'peds' | 'library' | 'refs'
@@ -202,7 +204,7 @@ function Intro({ onBegin }: { onBegin: () => void }) {
   )
 }
 
-function Skills({ onNext, onPrev, onPlay, openFindings, stethoscopeOn }: { onNext: () => void, onPrev: () => void, onPlay: (src: string | string[])=>void, openFindings: (list: string[])=>void, stethoscopeOn: boolean }) {
+function Skills({ onNext: _onNext, onPrev: _onPrev, onPlay, openFindings, stethoscopeOn }: { onNext: () => void, onPrev: () => void, onPlay: (src: string | string[])=>void, openFindings: (list: string[])=>void, stethoscopeOn: boolean }) {
   const adultTraining = [
     { t: 'Normal heart sounds', img: 'https://images.unsplash.com/photo-1581594693700-22d3b1a9e5a1?q=80&w=1200&auto=format&fit=crop', src: '/assets/audio/adultCASE1.mp3', f: [ 'Physiological split of S2 varies with inspiration', 'No added sounds or murmurs; PMI non‑displaced', 'Use as a baseline to compare intensity, timing and quality' ]},
     { t: 'Innocent (functional) flow murmur', img: 'https://images.unsplash.com/photo-1530026186672-2cd00ffc50fe?q=80&w=1200&auto=format&fit=crop', src: '/assets/audio/adultCASE2.mp3', f: [ 'Soft, midsystolic, grade ≤2/6; best at LLSB or apex', 'Often decreases with standing/Valsalva; increases with supine state', 'No radiation; normal S2; normal examination otherwise' ]},
@@ -330,6 +332,7 @@ function Skills({ onNext, onPrev, onPlay, openFindings, stethoscopeOn }: { onNex
 type Case = {
   id: string;
   title: string;
+  patientName: string;
   age: number;
   sex: 'M' | 'F';
   vignette: string;
@@ -356,6 +359,7 @@ const adultCases: Case[] = [
   {
     id: 'adult-1',
     title: 'Adult Case 1',
+    patientName: 'Mateo Santos',
     age: 22,
     sex: 'M',
     vignette: `22-year-old male for pre-military assessment. Previously active (hockey), currently less active; no cardiovascular symptoms. Family history unremarkable. BMI 28, HR 70 regular, BP 122/80. Pulses and precordial impulse normal. Auscultation in the usual areas; this recording is from the left upper sternal edge.`,
@@ -368,6 +372,7 @@ const adultCases: Case[] = [
   {
     id: 'adult-2',
     title: 'Adult Case 2',
+    patientName: 'Lilly Montana',
     age: 20,
     sex: 'F',
     vignette: `20-year-old female with routine work assessment. Very active (cycles/jogs), asymptomatic. No CV risk factors; recalls being told of an 'extra sound' in childhood. BMI 23, HR 60 regular, BP 112/75. Pulses normal. Listen in standard areas, especially apical region with the bell.`,
@@ -380,6 +385,7 @@ const adultCases: Case[] = [
   {
     id: 'adult-3',
     title: 'Adult Case 3',
+    patientName: 'Li Wei',
     age: 50,
     sex: 'F',
     vignette: `50-year-old woman with remote rheumatic-type illness as a teen. Active walker; mild DOE, a bit worse over the last year. BMI 24, exam otherwise normal with undisplaced apex. BP 125/80. Auscultate carefully at the apex for an opening snap and low-pitched diastolic rumble.`,
@@ -392,6 +398,7 @@ const adultCases: Case[] = [
   {
     id: 'adult-4',
     title: 'Adult Case 4',
+    patientName: "Seán O'Connor",
     age: 40,
     sex: 'M',
     vignette: `40-year-old male, lobster fisherman; increasing fatigue and mild exertional breathlessness. Followed since childhood for a murmur. BMI 24, HR 60 regular, BP 125/75. Suprasternal notch and RUSE thrills; pulses somewhat increased. Listen at both upper sternal borders and apex. Recording from LSB, 3rd interspace.`,
@@ -404,6 +411,7 @@ const adultCases: Case[] = [
   {
     id: 'adult-5',
     title: 'Adult Case 5',
+    patientName: 'Oluwaseun Adeyemi',
     age: 26,
     sex: 'M',
     vignette: `26-year-old male for police service. Healthy and highly active; no exertional symptoms. BMI 29. Childhood murmur without interventions. No family CV history. BP 122/82; pulses normal; apex not displaced. Focus auscultation at left lower sternal border and apical areas.`,
@@ -416,6 +424,7 @@ const adultCases: Case[] = [
   {
     id: 'adult-6',
     title: 'Adult Case 6',
+    patientName: 'Elena Petrova',
     age: 30,
     sex: 'F',
     vignette: `30-year-old female referred for a new murmur. Generally well, low activity; occasional brief palpitations with two episodes of mild dizziness. Minimal caffeine, rare alcohol, no meds. BMI 20. Apex not displaced; pulses normal; BP 110/80. Auscultate across the precordium, especially at the apex for midsystolic click and late systolic murmur.`,
@@ -428,6 +437,7 @@ const adultCases: Case[] = [
   {
     id: 'adult-7',
     title: 'Adult Case 7',
+    patientName: 'Nikhil Kumar',
     age: 30,
     sex: 'M',
     vignette: `30-year-old male referred for a murmur; recently immigrated. Lifelong good health; moderately active. BMI 24. BP 125/70; pulses easy to feel (possibly increased). Heart action not increased. Consider continuous machinery murmur and wide pulse pressure.`,
@@ -437,21 +447,33 @@ const adultCases: Case[] = [
     feedbackCorrect: 'Correct: PDA—continuous “machinery” murmur (systole + diastole), best below the left clavicle; bounding pulses and wide pulse pressure.',
     feedbackWrong: 'Hint: PDA is distinctive for being continuous through S2; listen in the left infraclavicular area and check pulse pressure.'
   },
+  {
+    id: 'adult-8',
+    title: 'Adult Case 8',
+    patientName: 'Isra',
+    age: 19,
+    sex: 'F',
+    vignette: `19-year-old female photographing her red house. She spots a cat, runs after it, and suddenly collapses. No prior medical history; occasional brief palpitations in the past. Family history notable for a cousin with 'heart problems' in youth. On exam: normal pulses, no focal neurology post-recovery. Required listening revealed a harsh crescendo–decrescendo systolic murmur along the left sternal border that increases with Valsalva/standing and decreases with squatting—suggestive of dynamic LVOT obstruction.`,
+    options: ['Hypertrophic obstructive cardiomyopathy','Aortic stenosis','Mitral valve prolapse','Pulmonary embolism'],
+    correctIndex: 0,
+    feedbackCorrect: 'Correct: Exertional syncope in a young person with a dynamic systolic murmur that increases with Valsalva is classic for hypertrophic obstructive cardiomyopathy.',
+    feedbackWrong: 'Hint: Dynamic murmurs that increase with Valsalva/standing and decrease with squatting point away from fixed outflow lesions and toward HOCM.',
+  },
 ]
 
 const congenitalCases: Case[] = [
-  { id: 'chd-1', title: 'CHD Case 1', age: 4, sex: 'F', vignette: '4-year-old girl, no symptoms. Normal growth and development. A quiet child, not as active as some other children. Examination: normal pulses, heart action perhaps a little increased and maximal close to the left sternal edge. You listen at the left upper sternal edge.', options: ['Atrial septal defect','Patent ductus arteriosus','Ventricular septal defect','Tetralogy of Fallot'], correctIndex: 0, audio: '/assets/audio/1-ASD.mp3', feedbackCorrect: 'Correct: Atrial septal defect—fixed split S2 and systolic flow murmur at the left upper sternal edge due to increased pulmonary flow.', feedbackWrong: 'Hint: A fixed (non-varying) split of S2 with a flow murmur at the left upper sternal edge points to atrial septal defect.' },
-  { id: 'chd-2', title: 'CHD Case 2', age: 9, sex: 'M', vignette: '9-year-old boy, asymptomatic. Routine physical exam. Normal growth and development. Normal pulses and cardiac impulse. You listen at the left upper sternal border.', options: ['Pulmonary stenosis','Atrial septal defect','Ventricular septal defect','Mitral regurgitation'], correctIndex: 0, audio: '/assets/audio/2-Pulmonary-stenosis.mp3', feedbackCorrect: 'Correct: Pulmonary stenosis—systolic ejection at the left upper sternal border with an ejection click; typically intensifies with inspiration.', feedbackWrong: 'Hint: Right-sided ejection murmurs at the left upper sternal border often rise with inspiration; an ejection click supports pulmonary stenosis.' },
-  { id: 'chd-3', title: 'CHD Case 3', age: 4, sex: 'M', vignette: '4-year-old boy, asymptomatic. Normal growth and development. On examination, slightly increased heart rate and bounding radial and femoral pulses. Heart action also slightly increased. You listen in the left upper sternal edge.', options: ['Patent ductus arteriosus','Ventricular septal defect','Atrial septal defect','Coarctation of aorta'], correctIndex: 0, audio: '/assets/audio/3-PDA.mp3', feedbackCorrect: 'Correct: Patent ductus arteriosus—continuous "machinery" murmur beneath the left clavicle with bounding pulses and wide pulse pressure.', feedbackWrong: 'Hint: A continuous murmur (systole + diastole) in the left infraclavicular area with bounding pulses suggests patent ductus arteriosus.' },
-  { id: 'chd-4', title: 'CHD Case 4', age: 10, sex: 'M', vignette: '10-year-old with 10 days of fever, increased heart rate and bounding pulses. He looks tired and unwell. Normal past history for growth and development, no prior symptoms.', options: ['Aortic stenosis + Aortic regurgitation','Patent ductus arteriosus','Pulmonary stenosis','Mitral regurgitation'], correctIndex: 0, audio: '/assets/audio/4-Aortic-stenosis-and-regurgitation.mp3', feedbackCorrect: 'Correct: Aortic stenosis with regurgitation—right upper sternal border ejection murmur radiating to carotids plus early diastolic decrescendo at left sternal border.', feedbackWrong: 'Hint: Dual lesion clue: systolic ejection at the base with carotid radiation and a separate early diastolic aortic regurgitation murmur.' },
-  { id: 'chd-5', title: 'CHD Case 5', age: 20, sex: 'F', vignette: '20-year-old female, no symptoms, good health. Routine physical examination. Normal heart action and pulses. You listen at the left upper sternal edge using the diaphragm of the stethoscope.', options: ['Normal','Atrial septal defect','Ventricular septal defect','Patent ductus arteriosus'], correctIndex: 0, audio: '/assets/audio/5-Normal-sounds.mp3', feedbackCorrect: 'Correct: Normal heart sounds—clear S1/S2 without murmurs. Use as a normal baseline.', feedbackWrong: 'Hint: No murmur or extra sounds; compare this normal timing and intensity to other clips.' },
-  { id: 'chd-6', title: 'CHD Case 6', age: 10, sex: 'M', vignette: '10-year-old boy. Normal growth and development. No symptoms, routine physical exam for competitive hockey. Normal body habitus. Normal pulses and heart action. You listen in all 4 areas; at the apex here are the sounds (some skin mic crackles present).', options: ['Bicuspid aortic valve','Mitral valve prolapse','Pulmonary stenosis','Tricuspid regurgitation'], correctIndex: 0, audio: '/assets/audio/6-Bicuspid-aortic-valve.mp3', feedbackCorrect: 'Correct: Bicuspid aortic valve—ejection click and systolic ejection at the base (often right upper sternal border); apex may transmit.', feedbackWrong: 'Hint: Seek an early systolic click followed by ejection murmur at the base; recordings may have minor artefact.' },
-  { id: 'chd-7', title: 'CHD Case 7', age: 4, sex: 'M', vignette: '4-year-old boy, completely healthy past history, very active without breathlessness or other cardiac symptoms. Slightly small for age (35th %ile). Heart action a bit increased along the left sternal edge; pulses normal. You listen at the left upper sternal edge.', options: ['Atrial septal defect','Ventricular septal defect','Patent ductus arteriosus','Normal'], correctIndex: 0, audio: '/assets/audio/7-ASD.mp3', feedbackCorrect: 'Correct: Atrial septal defect—fixed split S2 with systolic flow murmur at the left upper sternal edge in an otherwise well child.', feedbackWrong: 'Hint: In children, a fixed split S2 that does not vary with respiration is a classic atrial septal defect sign.' },
-  { id: 'chd-8', title: 'CHD Case 8', age: 7, sex: 'M', vignette: 'Healthy 7-year-old boy. Normal growth and development, no symptoms. Routine physical exam. Normal heart action and pulses. You listen at the apical area using the stethoscope bell.', options: ['Innocent murmur + S3','Ventricular septal defect','Mitral regurgitation','Aortic regurgitation'], correctIndex: 0, audio: '/assets/audio/8-Innocent-murmur-and-S3.mp3', feedbackCorrect: 'Correct: Innocent vibratory Still\'s murmur at the left lower sternal border with a physiological S3 at the apex.', feedbackWrong: 'Hint: A musical/vibratory left lower sternal border murmur with a physiological S3 in a healthy child is typically benign.' },
-  { id: 'chd-9', title: 'CHD Case 9', age: 7, sex: 'F', vignette: '7-year-old girl, normal growth and development, no symptoms. Normal heart action and pulses. Routine examination. You listen at the left sternal edge, 4th interspace.', options: ['Ventricular septal defect','Atrial septal defect','Patent ductus arteriosus','Mitral regurgitation'], correctIndex: 0, audio: '/assets/audio/9-VSD.mp3', feedbackCorrect: 'Correct: Ventricular septal defect—harsh holosystolic murmur at the left lower sternal edge; often palpable thrill.', feedbackWrong: 'Hint: Holosystolic timing at the left lower sternal border is typical for ventricular septal defect; palpate for a thrill to support the diagnosis.' },
+  { id: 'chd-1', title: 'CHD Case 1', patientName: 'Amira Hassan', age: 4, sex: 'F', vignette: '4-year-old girl, no symptoms. Normal growth and development. A quiet child, not as active as some other children. Examination: normal pulses, heart action perhaps a little increased and maximal close to the left sternal edge. You listen at the left upper sternal edge.', options: ['Atrial septal defect','Patent ductus arteriosus','Ventricular septal defect','Tetralogy of Fallot'], correctIndex: 0, audio: '/assets/audio/1-ASD.mp3', feedbackCorrect: 'Correct: Atrial septal defect—fixed split S2 and systolic flow murmur at the left upper sternal edge due to increased pulmonary flow.', feedbackWrong: 'Hint: A fixed (non-varying) split of S2 with a flow murmur at the left upper sternal edge points to atrial septal defect.' },
+  { id: 'chd-2', title: 'CHD Case 2', patientName: 'Diego Martínez', age: 9, sex: 'M', vignette: '9-year-old boy, asymptomatic. Routine physical exam. Normal growth and development. Normal pulses and cardiac impulse. You listen at the left upper sternal border.', options: ['Pulmonary stenosis','Atrial septal defect','Ventricular septal defect','Mitral regurgitation'], correctIndex: 0, audio: '/assets/audio/2-Pulmonary-stenosis.mp3', feedbackCorrect: 'Correct: Pulmonary stenosis—systolic ejection at the left upper sternal border with an ejection click; typically intensifies with inspiration.', feedbackWrong: 'Hint: Right-sided ejection murmurs at the left upper sternal border often rise with inspiration; an ejection click supports pulmonary stenosis.' },
+  { id: 'chd-3', title: 'CHD Case 3', patientName: 'Minh Nguyen', age: 4, sex: 'M', vignette: '4-year-old boy, asymptomatic. Normal growth and development. On examination, slightly increased heart rate and bounding radial and femoral pulses. Heart action also slightly increased. You listen in the left upper sternal edge.', options: ['Patent ductus arteriosus','Ventricular septal defect','Atrial septal defect','Coarctation of aorta'], correctIndex: 0, audio: '/assets/audio/3-PDA.mp3', feedbackCorrect: 'Correct: Patent ductus arteriosus—continuous "machinery" murmur beneath the left clavicle with bounding pulses and wide pulse pressure.', feedbackWrong: 'Hint: A continuous murmur (systole + diastole) in the left infraclavicular area with bounding pulses suggests patent ductus arteriosus.' },
+  { id: 'chd-4', title: 'CHD Case 4', patientName: 'Yusuf Ali', age: 10, sex: 'M', vignette: '10-year-old with 10 days of fever, increased heart rate and bounding pulses. He looks tired and unwell. Normal past history for growth and development, no prior symptoms.', options: ['Aortic stenosis + Aortic regurgitation','Patent ductus arteriosus','Pulmonary stenosis','Mitral regurgitation'], correctIndex: 0, audio: '/assets/audio/4-Aortic-stenosis-and-regurgitation.mp3', feedbackCorrect: 'Correct: Aortic stenosis with regurgitation—right upper sternal border ejection murmur radiating to carotids plus early diastolic decrescendo at left sternal border.', feedbackWrong: 'Hint: Dual lesion clue: systolic ejection at the base with carotid radiation and a separate early diastolic aortic regurgitation murmur.' },
+  { id: 'chd-5', title: 'CHD Case 5', patientName: 'Sofia Rossi', age: 20, sex: 'F', vignette: '20-year-old female, no symptoms, good health. Routine physical examination. Normal heart action and pulses. You listen at the left upper sternal edge using the diaphragm of the stethoscope.', options: ['Normal','Atrial septal defect','Ventricular septal defect','Patent ductus arteriosus'], correctIndex: 0, audio: '/assets/audio/5-Normal-sounds.mp3', feedbackCorrect: 'Correct: Normal heart sounds—clear S1/S2 without murmurs. Use as a normal baseline.', feedbackWrong: 'Hint: No murmur or extra sounds; compare this normal timing and intensity to other clips.' },
+  { id: 'chd-6', title: 'CHD Case 6', patientName: 'Noah Cohen', age: 10, sex: 'M', vignette: '10-year-old boy. Normal growth and development. No symptoms, routine physical exam for competitive hockey. Normal body habitus. Normal pulses and heart action. You listen in all 4 areas; at the apex here are the sounds (some skin mic crackles present).', options: ['Bicuspid aortic valve','Mitral valve prolapse','Pulmonary stenosis','Tricuspid regurgitation'], correctIndex: 0, audio: '/assets/audio/6-Bicuspid-aortic-valve.mp3', feedbackCorrect: 'Correct: Bicuspid aortic valve—ejection click and systolic ejection at the base (often right upper sternal border); apex may transmit.', feedbackWrong: 'Hint: Seek an early systolic click followed by ejection murmur at the base; recordings may have minor artefact.' },
+  { id: 'chd-7', title: 'CHD Case 7', patientName: 'Hiro Tanaka', age: 4, sex: 'M', vignette: '4-year-old boy, completely healthy past history, very active without breathlessness or other cardiac symptoms. Slightly small for age (35th %ile). Heart action a bit increased along the left sternal edge; pulses normal. You listen at the left upper sternal edge.', options: ['Atrial septal defect','Ventricular septal defect','Patent ductus arteriosus','Normal'], correctIndex: 0, audio: '/assets/audio/7-ASD.mp3', feedbackCorrect: 'Correct: Atrial septal defect—fixed split S2 with systolic flow murmur at the left upper sternal edge in an otherwise well child.', feedbackWrong: 'Hint: In children, a fixed split S2 that does not vary with respiration is a classic atrial septal defect sign.' },
+  { id: 'chd-8', title: 'CHD Case 8', patientName: 'Arjun Patel', age: 7, sex: 'M', vignette: 'Healthy 7-year-old boy. Normal growth and development, no symptoms. Routine physical exam. Normal heart action and pulses. You listen at the apical area using the stethoscope bell.', options: ['Innocent murmur + S3','Ventricular septal defect','Mitral regurgitation','Aortic regurgitation'], correctIndex: 0, audio: '/assets/audio/8-Innocent-murmur-and-S3.mp3', feedbackCorrect: 'Correct: Innocent vibratory Still\'s murmur at the left lower sternal border with a physiological S3 at the apex.', feedbackWrong: 'Hint: A musical/vibratory left lower sternal border murmur with a physiological S3 in a healthy child is typically benign.' },
+  { id: 'chd-9', title: 'CHD Case 9', patientName: 'Mia Novak', age: 7, sex: 'F', vignette: '7-year-old girl, normal growth and development, no symptoms. Normal heart action and pulses. Routine examination. You listen at the left sternal edge, 4th interspace.', options: ['Ventricular septal defect','Atrial septal defect','Patent ductus arteriosus','Mitral regurgitation'], correctIndex: 0, audio: '/assets/audio/9-VSD.mp3', feedbackCorrect: 'Correct: Ventricular septal defect—harsh holosystolic murmur at the left lower sternal edge; often palpable thrill.', feedbackWrong: 'Hint: Holosystolic timing at the left lower sternal border is typical for ventricular septal defect; palpate for a thrill to support the diagnosis.' },
 ]
 
-function Peds({ onNext, onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, onStop }: { onNext: () => void, onPrev: () => void, setAccuracy: (n: number) => void, accuracy: number, stethoscopeOn: boolean, onPlay: (src: string)=>void, onStop: () => void }) {
+function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, onStop }: { onNext: () => void, onPrev: () => void, setAccuracy: Dispatch<SetStateAction<number>>, accuracy: number, stethoscopeOn: boolean, onPlay: (src: string)=>void, onStop: () => void }) {
   const deck = congenitalCases
   const [idx, setIdx] = useState(0)
   const [selected, setSelected] = useState<number|null>(null)
@@ -459,6 +481,8 @@ function Peds({ onNext, onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, on
   const current = deck[idx]
   const isLast = idx >= deck.length - 1
   const isFirst = idx <= 0
+  const [highlightOn, setHighlightOn] = useState(false)
+  const vignetteRef = useRef<HTMLParagraphElement|null>(null)
 
   // Generate shuffled options for current case
   const shuffledOptions = useMemo(() => {
@@ -486,16 +510,66 @@ function Peds({ onNext, onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, on
     setIsCorrect(null)
     setIdx(i => Math.max(0, i-1))
   }
+  function handleMouseUpHighlight() {
+    if (!highlightOn) return
+    const container = vignetteRef.current
+    if (!container) return
+    const selection = window.getSelection()
+    if (!selection || selection.isCollapsed || selection.rangeCount === 0) return
+    const range = selection.getRangeAt(0)
+    if (!container.contains(range.commonAncestorContainer)) return
+    try {
+      const span = document.createElement('span')
+      span.className = 'neon-highlight'
+      // Prefer surroundContents, fallback to extract/insert if it throws
+      try {
+        range.surroundContents(span)
+      } catch {
+        const contents = range.extractContents()
+        span.appendChild(contents)
+        range.insertNode(span)
+      }
+    } finally {
+      selection.removeAllRanges()
+    }
+  }
+  function clearHighlights() {
+    const container = vignetteRef.current
+    if (!container) return
+    const marks = container.querySelectorAll('.neon-highlight')
+    marks.forEach((el) => {
+      const parent = el.parentNode
+      while (el.firstChild) parent?.insertBefore(el.firstChild, el)
+      parent?.removeChild(el)
+    })
+  }
 
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 mx-auto max-w-4xl w-full px-6 py-8 grid grid-rows-[auto_1fr_auto] gap-6">
         <Mentor text="Welcome to the Peds Ward. Smaller patients, equally big learning." />
         <AnimatePresence mode="popLayout" initial={false}>
-          <motion.div key={current.id} initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.5 }} className="rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
+          <motion.div key={current.id} initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.5 }} className="relative rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
             <div className="text-sm text-slate-300 mb-1">{current.title}</div>
-            <div className="text-xs text-slate-400 mb-3">Patient: {current.age}y · {current.sex}</div>
-            <p className="mb-4">{current.vignette}</p>
+            <div className="text-xs text-slate-400 mb-3">Patient: {current.patientName} · {current.age}y · {current.sex}</div>
+            <p ref={vignetteRef} onMouseUp={handleMouseUpHighlight} className="mb-4">{current.vignette}</p>
+            {/* Floating vertical highlighter controls */}
+            <div className="absolute top-3 right-1 z-10 flex flex-col gap-1.5">
+              <button
+                onClick={()=> setHighlightOn(v=>!v)}
+                className={`px-1.5 py-1.5 rounded-md border ${highlightOn ? 'border-cyan-400 bg-cyan-500/10 text-cyan-200 shadow-[0_0_8px_rgba(56,189,248,0.5)]' : 'border-white/10 bg-white/0 hover:bg-white/5 text-slate-200'}`}
+                title="Toggle highlighter"
+              >
+                <FiPenTool size={16} />
+              </button>
+              <button
+                onClick={clearHighlights}
+                className="px-1.5 py-1.5 rounded-md border border-white/10 bg-white/0 hover:bg-white/5 text-slate-200"
+                title="Clear highlights"
+              >
+                <LuEraser size={16} />
+              </button>
+            </div>
             <div className="flex items-center gap-2 mb-4">
               <button disabled={!stethoscopeOn || !current.audio} onClick={()=> current.audio && onPlay(current.audio)} className={`px-3 py-1.5 rounded-md ${stethoscopeOn? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200':'bg-white/10 text-slate-300 opacity-60'} `}>🔊 Listen</button>
               {!stethoscopeOn && <span className="text-amber-300 text-xs">Equip stethoscope to enable listening</span>}
@@ -615,12 +689,14 @@ function References() {
   )
 }
 
-function Ward({ onNext, onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, onStop }: { onNext: () => void, onPrev: () => void, setAccuracy: (n: number) => void, accuracy: number, stethoscopeOn: boolean, onPlay: (src: string)=>void, onStop: () => void }) {
+function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, onStop }: { onNext: () => void, onPrev: () => void, setAccuracy: Dispatch<SetStateAction<number>>, accuracy: number, stethoscopeOn: boolean, onPlay: (src: string)=>void, onStop: () => void }) {
   const deck = adultCases
   const [idx, setIdx] = useState(0)
   const [selected, setSelected] = useState<number|null>(null)
   const [isCorrect, setIsCorrect] = useState<boolean|null>(null)
   const current = deck[idx]
+  const [highlightOn, setHighlightOn] = useState(false)
+  const vignetteRef = useRef<HTMLParagraphElement|null>(null)
 
   // Generate shuffled options for current case
   const shuffledOptions = useMemo(() => {
@@ -633,6 +709,39 @@ function Ward({ onNext, onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, on
     setSelected(i)
     setIsCorrect(correct)
     setAccuracy(a=> Math.max(0, Math.min(100, a + (correct? +3 : -6))))
+  }
+
+  function handleMouseUpHighlight() {
+    if (!highlightOn) return
+    const container = vignetteRef.current
+    if (!container) return
+    const selection = window.getSelection()
+    if (!selection || selection.isCollapsed || selection.rangeCount === 0) return
+    const range = selection.getRangeAt(0)
+    if (!container.contains(range.commonAncestorContainer)) return
+    try {
+      const span = document.createElement('span')
+      span.className = 'neon-highlight'
+      try {
+        range.surroundContents(span)
+      } catch {
+        const contents = range.extractContents()
+        span.appendChild(contents)
+        range.insertNode(span)
+      }
+    } finally {
+      selection.removeAllRanges()
+    }
+  }
+  function clearHighlights() {
+    const container = vignetteRef.current
+    if (!container) return
+    const marks = container.querySelectorAll('.neon-highlight')
+    marks.forEach((el) => {
+      const parent = el.parentNode
+      while (el.firstChild) parent?.insertBefore(el.firstChild, el)
+      parent?.removeChild(el)
+    })
   }
 
   const isLast = idx >= deck.length - 1
@@ -659,10 +768,27 @@ function Ward({ onNext, onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, on
       <div className="flex-1 mx-auto max-w-4xl w-full px-6 py-8 grid grid-rows-[auto_1fr_auto] gap-6">
         <Mentor text="We’ll move bed-to-bed. Read the case file, listen, and decide." />
         <AnimatePresence mode="popLayout" initial={false}>
-          <motion.div key={current.id} initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.5 }} className="rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
+          <motion.div key={current.id} initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.5 }} className="relative rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
             <div className="text-sm text-slate-300 mb-1">{current.title}</div>
-            <div className="text-xs text-slate-400 mb-3">Patient: {current.age}y · {current.sex}</div>
-            <p className="mb-4">{current.vignette}</p>
+            <div className="text-xs text-slate-400 mb-3">Patient: {current.patientName} · {current.age}y · {current.sex}</div>
+            <p ref={vignetteRef} onMouseUp={handleMouseUpHighlight} className="mb-4">{current.vignette}</p>
+            {/* Floating vertical highlighter controls */}
+            <div className="absolute top-3 right-1 z-10 flex flex-col gap-1.5">
+              <button
+                onClick={()=> setHighlightOn(v=>!v)}
+                className={`px-1.5 py-1.5 rounded-md border ${highlightOn ? 'border-cyan-400 bg-cyan-500/10 text-cyan-200 shadow-[0_0_8px_rgba(56,189,248,0.5)]' : 'border-white/10 bg-white/0 hover:bg-white/5 text-slate-200'}`}
+                title="Toggle highlighter"
+              >
+                <FiPenTool size={16} />
+              </button>
+              <button
+                onClick={clearHighlights}
+                className="px-1.5 py-1.5 rounded-md border border-white/10 bg-white/0 hover:bg-white/5 text-slate-200"
+                title="Clear highlights"
+              >
+                <LuEraser size={16} />
+              </button>
+            </div>
             <div className="flex items-center gap-2 mb-4">
               <button disabled={!stethoscopeOn || !current.audio} onClick={()=> current.audio && onPlay(current.audio)} className={`px-3 py-1.5 rounded-md ${stethoscopeOn? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200':'bg-white/10 text-slate-300 opacity-60'} `}>🔊 Listen</button>
               {!stethoscopeOn && <span className="text-amber-300 text-xs">Equip stethoscope to enable listening</span>}
@@ -706,7 +832,7 @@ function Ward({ onNext, onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, on
   )
 }
 
-function Library({ onPrev }: { onPrev: () => void }) {
+function Library({ onPrev: _onPrev }: { onPrev: () => void }) {
   const resources = [
     {
       title: "British Society of Echocardiography Guidelines",
@@ -804,7 +930,7 @@ function Library({ onPrev }: { onPrev: () => void }) {
         
         {/* Additional Learning Tips Section */}
         <div className="mt-8 rounded-xl border border-white/10 bg-white/5 p-6">
-          <h3 className="text-lg font-semibold text-emerald-300 mb-4">💡 Learning Tips from Dr Murmur</h3>
+          <h3 className="text-lg font-semibold text-emerald-300 mb-4">💡 Learning Tips from Dr. Lubb von Dub</h3>
           <div className="grid md:grid-cols-2 gap-4 text-sm text-slate-300">
             <div>
               <h4 className="font-semibold text-slate-200 mb-2">Practice Regularly</h4>
@@ -834,14 +960,14 @@ function Mentor({ text }: { text: string }) {
     <div className="flex items-start gap-3">
       <div className="w-12 h-12 rounded-full overflow-hidden bg-white/10 border border-emerald-400/30 shadow-[0_0_12px_rgba(16,185,129,0.35)]">
         <img
-          src="https://images.unsplash.com/photo-1556157382-97eda2d62296?q=80&w=256&auto=format&fit=crop"
-          alt="Dr Jeffery Murmur"
+          src="https://upload.wikimedia.org/wikipedia/commons/1/16/William_Osler.jpg"
+          alt="Dr. Lubb von Dub"
           className="w-full h-full object-cover"
           onError={(e)=>{ (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=256&auto=format&fit=crop' }}
         />
       </div>
       <motion.div initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-        <div className="text-emerald-300 font-semibold mb-1">Dr Jeffery Murmur · Senior Registrar</div>
+        <div className="text-emerald-300 font-semibold mb-1">Dr. Lubb von Dub · Senior Registrar</div>
         <p className="text-slate-200">{text}</p>
       </motion.div>
     </div>
