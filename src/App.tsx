@@ -539,7 +539,9 @@ function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
   const isLast = idx >= deck.length - 1
   const isFirst = idx <= 0
   const [highlightOn, setHighlightOn] = useState(false)
-  const vignetteRef = useRef<HTMLParagraphElement|null>(null)
+  const deskVignetteRef = useRef<HTMLParagraphElement|null>(null)
+  const mobileVignetteRef = useRef<HTMLParagraphElement|null>(null)
+  const mobileTokens = useMemo(() => (current.vignette.match(/\s+|[^\s]+/g) || [current.vignette]), [current.vignette])
 
   // Generate shuffled options for current case
   const shuffledOptions = useMemo(() => {
@@ -569,7 +571,7 @@ function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
   }
   function handleMouseUpHighlight() {
     if (!highlightOn) return
-    const container = vignetteRef.current
+    const container = deskVignetteRef.current
     if (!container) return
     const selection = window.getSelection()
     if (!selection || selection.isCollapsed || selection.rangeCount === 0) return
@@ -578,6 +580,7 @@ function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
     try {
       const span = document.createElement('span')
       span.className = 'neon-highlight'
+      span.setAttribute('data-hl', '1')
       // Prefer surroundContents, fallback to extract/insert if it throws
       try {
         range.surroundContents(span)
@@ -591,14 +594,22 @@ function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
     }
   }
   function clearHighlights() {
-    const container = vignetteRef.current
-    if (!container) return
-    const marks = container.querySelectorAll('.neon-highlight')
-    marks.forEach((el) => {
-      const parent = el.parentNode
-      while (el.firstChild) parent?.insertBefore(el.firstChild, el)
-      parent?.removeChild(el)
-    })
+    const clearIn = (container: HTMLElement|null) => {
+      if (!container) return
+      const marks = Array.from(container.querySelectorAll<HTMLElement>('.neon-highlight'))
+      marks.forEach((el) => {
+        if (el.dataset.hl === '1') {
+          // unwrap only spans we created for selection
+          const parent = el.parentNode as HTMLElement | null
+          while (el.firstChild) parent?.insertBefore(el.firstChild, el)
+          parent?.removeChild(el)
+        } else {
+          el.classList.remove('neon-highlight')
+        }
+      })
+    }
+    clearIn(deskVignetteRef.current)
+    clearIn(mobileVignetteRef.current)
   }
 
   return (
@@ -609,21 +620,21 @@ function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
           <motion.div key={current.id} initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.5 }} className="relative rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
             <div className="text-sm text-slate-300 mb-1">{current.title}</div>
             <div className="text-xs text-slate-400 mb-3">Patient: {current.patientName} · {current.age}y · {current.sex}</div>
-            {/* Vignette with mobile-friendly sentence tap highlighting */}
-            <p ref={vignetteRef} onMouseUp={handleMouseUpHighlight} className="mb-4 select-text">
-              {useMemo(() => (current.vignette.match(/[^.!?]+[.!?]?/g) || [current.vignette]), [current.vignette]).map((s, i) => (
+            {/* Vignette: desktop selection-based + mobile token-tap highlighting */}
+            <p ref={deskVignetteRef} onMouseUp={handleMouseUpHighlight} className="mb-4 select-text hidden sm:block">{current.vignette}</p>
+            <p ref={mobileVignetteRef} className="mb-4 sm:hidden leading-relaxed">
+              {mobileTokens.map((tok: string, i: number) => (
                 <span
                   key={i}
+                  className={tok.trim().length ? 'cursor-pointer' : ''}
                   onClick={()=>{
                     if (!highlightOn) return
-                    // toggle neon-highlight on this sentence span
-                    const el = document.querySelector(`[data-sent='peds-${i}']`) as HTMLElement|null
-                    (el ?? ({} as any)).classList?.toggle('neon-highlight')
+                    if (!tok.trim().length) return
+                    const el = (mobileVignetteRef.current?.children[i] as HTMLElement | undefined)
+                    el?.classList.toggle('neon-highlight')
                   }}
-                  data-sent={`peds-${i}`}
-                  className="cursor-text"
                 >
-                  {s + ' '}
+                  {tok}
                 </span>
               ))}
             </p>
@@ -770,7 +781,9 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
   const [isCorrect, setIsCorrect] = useState<boolean|null>(null)
   const current = deck[idx]
   const [highlightOn, setHighlightOn] = useState(false)
-  const vignetteRef = useRef<HTMLParagraphElement|null>(null)
+  const deskVignetteRef = useRef<HTMLParagraphElement|null>(null)
+  const mobileVignetteRef = useRef<HTMLParagraphElement|null>(null)
+  const mobileTokens = useMemo(() => (current.vignette.match(/\s+|[^\s]+/g) || [current.vignette]), [current.vignette])
 
   // Generate shuffled options for current case
   const shuffledOptions = useMemo(() => {
@@ -787,7 +800,7 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
 
   function handleMouseUpHighlight() {
     if (!highlightOn) return
-    const container = vignetteRef.current
+    const container = deskVignetteRef.current
     if (!container) return
     const selection = window.getSelection()
     if (!selection || selection.isCollapsed || selection.rangeCount === 0) return
@@ -796,6 +809,7 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
     try {
       const span = document.createElement('span')
       span.className = 'neon-highlight'
+      span.setAttribute('data-hl', '1')
       try {
         range.surroundContents(span)
       } catch {
@@ -808,14 +822,21 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
     }
   }
   function clearHighlights() {
-    const container = vignetteRef.current
-    if (!container) return
-    const marks = container.querySelectorAll('.neon-highlight')
-    marks.forEach((el) => {
-      const parent = el.parentNode
-      while (el.firstChild) parent?.insertBefore(el.firstChild, el)
-      parent?.removeChild(el)
-    })
+    const clearIn = (container: HTMLElement|null) => {
+      if (!container) return
+      const marks = Array.from(container.querySelectorAll<HTMLElement>('.neon-highlight'))
+      marks.forEach((el) => {
+        if (el.dataset.hl === '1') {
+          const parent = el.parentNode as HTMLElement | null
+          while (el.firstChild) parent?.insertBefore(el.firstChild, el)
+          parent?.removeChild(el)
+        } else {
+          el.classList.remove('neon-highlight')
+        }
+      })
+    }
+    clearIn(deskVignetteRef.current)
+    clearIn(mobileVignetteRef.current)
   }
 
   const isLast = idx >= deck.length - 1
@@ -845,20 +866,21 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
           <motion.div key={current.id} initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.5 }} className="relative rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
             <div className="text-sm text-slate-300 mb-1">{current.title}</div>
             <div className="text-xs text-slate-400 mb-3">Patient: {current.patientName} · {current.age}y · {current.sex}</div>
-            {/* Vignette with mobile-friendly sentence tap highlighting */}
-            <p ref={vignetteRef} onMouseUp={handleMouseUpHighlight} className="mb-4 select-text">
-              {useMemo(() => (current.vignette.match(/[^.!?]+[.!?]?/g) || [current.vignette]), [current.vignette]).map((s, i) => (
+            {/* Vignette: desktop selection-based + mobile token-tap highlighting */}
+            <p ref={deskVignetteRef} onMouseUp={handleMouseUpHighlight} className="mb-4 select-text hidden sm:block">{current.vignette}</p>
+            <p ref={mobileVignetteRef} className="mb-4 sm:hidden leading-relaxed">
+              {mobileTokens.map((tok: string, i: number) => (
                 <span
                   key={i}
+                  className={tok.trim().length ? 'cursor-pointer' : ''}
                   onClick={()=>{
                     if (!highlightOn) return
-                    const el = document.querySelector(`[data-sent='ward-${i}']`) as HTMLElement|null
-                    (el ?? ({} as any)).classList?.toggle('neon-highlight')
+                    if (!tok.trim().length) return
+                    const el = (mobileVignetteRef.current?.children[i] as HTMLElement | undefined)
+                    el?.classList.toggle('neon-highlight')
                   }}
-                  data-sent={`ward-${i}`}
-                  className="cursor-text"
                 >
-                  {s + ' '}
+                  {tok}
                 </span>
               ))}
             </p>
