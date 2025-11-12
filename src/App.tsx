@@ -940,7 +940,7 @@ export function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethosco
             {/* Highlight controls - horizontal row, eraser left of pen */}
             <div className="absolute top-3 right-1 z-10 flex flex-row gap-1.5">
               <button
-                onClick={(e)=> clearHighlights(e.currentTarget as HTMLElement)}
+                onClick={()=> clearHighlights()}
                 className="px-1.5 py-1.5 rounded-md border border-white/10 bg-white/0 hover:bg-white/5 text-slate-200"
                 title="Clear highlights"
               >
@@ -1502,31 +1502,7 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
     setAttempts(a => a + 1)
   }
 
-  function handleSelectionHighlight() {
-    setTimeout(() => {
-      if (!highlightOn) return
-      const container = vignetteRef.current
-      if (!container) return
-      const sel = window.getSelection()
-      if (!sel || sel.isCollapsed || sel.rangeCount === 0) return
-      const range = sel.getRangeAt(0)
-      if (!container.contains(range.commonAncestorContainer)) return
-      try {
-        const span = document.createElement('span')
-        span.className = 'neon-highlight'
-        span.setAttribute('data-hl', '1')
-        try {
-          range.surroundContents(span)
-        } catch {
-          const contents = range.extractContents()
-          span.appendChild(contents)
-          range.insertNode(span)
-        }
-      } finally {
-        sel.removeAllRanges()
-      }
-    }, 0)
-  }
+  // selection handled by CaseHighlighter
 
   function clearHighlights() {
     hlRef.current?.clear()
@@ -1583,7 +1559,7 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
                 onPointerUp={(e)=> e.stopPropagation()}
                 onTouchEnd={(e)=> { e.stopPropagation() }}
                 onMouseUp={(e)=> e.stopPropagation()}
-                onClick={(e)=> clearHighlights(e.currentTarget as HTMLElement)}
+                onClick={()=> clearHighlights()}
                 className="px-1.5 py-1.5 rounded-md border border-white/10 bg-white/0 hover:bg-white/5 text-slate-200"
                 title="Clear highlights"
               >
@@ -1593,12 +1569,12 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
                 onPointerUp={(e)=> e.stopPropagation()}
                 onTouchEnd={(e)=> { e.stopPropagation() }}
                 onMouseUp={(e)=> e.stopPropagation()}
-                onClick={(e)=> {
+                onClick={()=>{
                   setHighlightOn(v=>{
                     const next = !v
                     if (!next) {
                       // when pen is turned off, clear highlights for this card
-                      clearHighlights(e.currentTarget as HTMLElement)
+                      clearHighlights()
                     }
                     return next
                   })
