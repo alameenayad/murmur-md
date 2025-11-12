@@ -5,9 +5,9 @@ import { FiActivity, FiFolder, FiBookOpen, FiArrowLeft, FiArrowRight, FiCheckCir
 import { LuEraser } from 'react-icons/lu'
 import { TbStethoscope, TbBrain, TbEar, TbTopologyStar3 } from 'react-icons/tb'
 
-type Scene = 'intro' | 'ausc' | 'skills' | 'ward' | 'quiz' | 'ward2' | 'progress' | 'library' | 'refs'
+type Scene = 'intro' | 'ausc' | 'shuffle' | 'skills' | 'ward' | 'quiz' | 'ward2' | 'progress' | 'library' | 'refs'
 
-const scenes: Scene[] = ['intro', 'ausc', 'skills', 'ward', 'quiz', 'ward2', 'progress', 'library', 'refs']
+const scenes: Scene[] = ['intro', 'ausc', 'shuffle', 'skills', 'ward', 'quiz', 'ward2', 'progress', 'library', 'refs']
 
 const variants = {
   enter: { x: 24, opacity: 0 },
@@ -36,6 +36,7 @@ export default function App() {
   const title = useMemo(() => ({
     intro: 'Start Shift',
     ausc: 'Auscultation Intro',
+    shuffle: 'Shuffle Round',
     skills: 'Skills Lab',
     ward: 'Ward Round',
     quiz: 'Audio Recognition Quiz',
@@ -114,13 +115,14 @@ export default function App() {
           <nav className="flex-1 flex flex-col gap-3 text-sm">
             <SidebarItem collapsed={desktopNavCollapsed} label="Start Shift" active={scene==='intro'} onClick={()=>goto(0)} icon={<FiActivity />} />
             <SidebarItem collapsed={desktopNavCollapsed} label="Auscultation Intro" active={scene==='ausc'} onClick={()=>goto(1)} icon={<TbStethoscope />} />
-            <SidebarItem collapsed={desktopNavCollapsed} label="Skills Lab" active={scene==='skills'} onClick={()=>goto(2)} icon={<TbStethoscope />} />
-            <SidebarItem collapsed={desktopNavCollapsed} label="Ward Round" active={scene==='ward'} onClick={()=>goto(3)} icon={<FiFolder />} />
-            <SidebarItem collapsed={desktopNavCollapsed} label="Audio Quiz" active={scene==='quiz'} onClick={()=>goto(4)} icon={<FiActivity />} />
-            <SidebarItem collapsed={desktopNavCollapsed} label="Ward Round II" active={scene==='ward2'} onClick={()=>goto(5)} icon={<FiFolder />} />
-            <SidebarItem collapsed={desktopNavCollapsed} label="Progress" active={scene==='progress'} onClick={()=>goto(6)} icon={<FiActivity />} />
-            <SidebarItem collapsed={desktopNavCollapsed} label="Library" active={scene==='library'} onClick={()=>goto(7)} icon={<FiBookOpen />} />
-            <SidebarItem collapsed={desktopNavCollapsed} label="References" active={scene==='refs'} onClick={()=>goto(8)} icon={<FiBookOpen />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Shuffle Round" active={scene==='shuffle'} onClick={()=>goto(2)} icon={<FiActivity />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Skills Lab" active={scene==='skills'} onClick={()=>goto(3)} icon={<TbStethoscope />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Ward Round" active={scene==='ward'} onClick={()=>goto(4)} icon={<FiFolder />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Audio Quiz" active={scene==='quiz'} onClick={()=>goto(5)} icon={<FiActivity />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Ward Round II" active={scene==='ward2'} onClick={()=>goto(6)} icon={<FiFolder />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Progress" active={scene==='progress'} onClick={()=>goto(7)} icon={<FiActivity />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Library" active={scene==='library'} onClick={()=>goto(8)} icon={<FiBookOpen />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="References" active={scene==='refs'} onClick={()=>goto(9)} icon={<FiBookOpen />} />
           </nav>
           <div className="mt-auto space-y-4">
             <div className="w-full grid place-items-center">
@@ -164,13 +166,14 @@ export default function App() {
           <nav className="flex-1 flex flex-col gap-2 text-sm">
             <SidebarItem label="Start Shift" active={scene==='intro'} onClick={()=>{goto(0); setMobileNavOpen(false)}} icon={<FiActivity />} />
             <SidebarItem label="Auscultation Intro" active={scene==='ausc'} onClick={()=>{goto(1); setMobileNavOpen(false)}} icon={<TbStethoscope />} />
-            <SidebarItem label="Skills Lab" active={scene==='skills'} onClick={()=>{goto(2); setMobileNavOpen(false)}} icon={<TbStethoscope />} />
-            <SidebarItem label="Ward Round" active={scene==='ward'} onClick={()=>{goto(3); setMobileNavOpen(false)}} icon={<FiFolder />} />
-            <SidebarItem label="Audio Quiz" active={scene==='quiz'} onClick={()=>{goto(4); setMobileNavOpen(false)}} icon={<FiActivity />} />
-            <SidebarItem label="Ward Round II" active={scene==='ward2'} onClick={()=>{goto(5); setMobileNavOpen(false)}} icon={<FiFolder />} />
-            <SidebarItem label="Progress" active={scene==='progress'} onClick={()=>{goto(6); setMobileNavOpen(false)}} icon={<FiActivity />} />
-            <SidebarItem label="Library" active={scene==='library'} onClick={()=>{goto(7); setMobileNavOpen(false)}} icon={<FiBookOpen />} />
-            <SidebarItem label="References" active={scene==='refs'} onClick={()=>{goto(8); setMobileNavOpen(false)}} icon={<FiBookOpen />} />
+            <SidebarItem label="Shuffle Round" active={scene==='shuffle'} onClick={()=>{goto(2); setMobileNavOpen(false)}} icon={<FiActivity />} />
+            <SidebarItem label="Skills Lab" active={scene==='skills'} onClick={()=>{goto(3); setMobileNavOpen(false)}} icon={<TbStethoscope />} />
+            <SidebarItem label="Ward Round" active={scene==='ward'} onClick={()=>{goto(4); setMobileNavOpen(false)}} icon={<FiFolder />} />
+            <SidebarItem label="Audio Quiz" active={scene==='quiz'} onClick={()=>{goto(5); setMobileNavOpen(false)}} icon={<FiActivity />} />
+            <SidebarItem label="Ward Round II" active={scene==='ward2'} onClick={()=>{goto(6); setMobileNavOpen(false)}} icon={<FiFolder />} />
+            <SidebarItem label="Progress" active={scene==='progress'} onClick={()=>{goto(7); setMobileNavOpen(false)}} icon={<FiActivity />} />
+            <SidebarItem label="Library" active={scene==='library'} onClick={()=>{goto(8); setMobileNavOpen(false)}} icon={<FiBookOpen />} />
+            <SidebarItem label="References" active={scene==='refs'} onClick={()=>{goto(9); setMobileNavOpen(false)}} icon={<FiBookOpen />} />
           </nav>
           <div className="mt-auto space-y-4">
             <div className="w-full grid place-items-center">
@@ -224,6 +227,7 @@ export default function App() {
               >
                 {scene === 'intro' && <Intro onBegin={next} />}
                 {scene === 'ausc' && <Auscultation />}
+                {scene === 'shuffle' && <ShuffleRound />}
                 {scene === 'skills' && <Skills onNext={next} onPrev={prev} onPlay={play} openFindings={(list)=>{setFindingsList(list); setFindingsOpen(true)}} stethoscopeOn={stethoscopeOn} />}
                 {scene === 'ward' && <Ward onNext={next} onPrev={prev} setAccuracy={setAccuracy} accuracy={accuracy} stethoscopeOn={stethoscopeOn} onPlay={play} onStop={stop} onFinishRound={(score)=> setRound1Score(score)} />}
                 {scene === 'quiz' && <AudioQuiz onPlay={play} onStop={stop} stethoscopeOn={stethoscopeOn} />}
@@ -838,6 +842,58 @@ const adultCases2: Case[] = standardAdultMurmurs.map((m, i) => {
     feedbackWrong: `Hint: ${m.name.includes('Regurgitation') ? 'Listen for pansystolic vs early diastolic patterns and radiation.' : 'Focus on timing, location, and response to inspiration/expiration.'} — Try again.`,
   }
 })
+
+// Shared highlighter for case vignettes (module-scoped so Ward and Ward2 can use it)
+class CaseHighlighter {
+  private root: HTMLParagraphElement
+  private enabled = true
+  private onEndBound = (ev: Event) => this.onEnd(ev)
+  constructor(root: HTMLParagraphElement) {
+    this.root = root
+    root.addEventListener('pointerup', this.onEndBound, { passive: true } as any)
+    root.addEventListener('touchend', this.onEndBound, { passive: true } as any)
+  }
+  enable() { this.enabled = true }
+  disable() { this.enabled = false }
+  clear() {
+    const spans = this.root.querySelectorAll<HTMLSpanElement>('span[data-hl="1"], span.neon-highlight')
+    spans.forEach(span => {
+      const parent = span.parentNode as HTMLElement | null
+      while (span.firstChild) parent?.insertBefore(span.firstChild, span)
+      parent?.removeChild(span)
+    })
+    this.root.querySelectorAll<HTMLElement>('.neon-highlight').forEach(el => el.classList.remove('neon-highlight'))
+    try { window.getSelection()?.removeAllRanges() } catch {}
+  }
+  dispose() {
+    this.disable()
+    this.root.removeEventListener('pointerup', this.onEndBound as any)
+    this.root.removeEventListener('touchend', this.onEndBound as any)
+  }
+  private onEnd(_ev: Event) {
+    if (!this.enabled) return
+    window.setTimeout(() => {
+      const sel = window.getSelection()
+      if (!sel || sel.isCollapsed || sel.rangeCount === 0) return
+      const range = sel.getRangeAt(0)
+      if (!this.root.contains(range.commonAncestorContainer)) return
+      try {
+        const span = document.createElement('span')
+        span.className = 'neon-highlight'
+        span.setAttribute('data-hl', '1')
+        try {
+          range.surroundContents(span)
+        } catch {
+          const contents = range.extractContents()
+          span.appendChild(contents)
+          range.insertNode(span)
+        }
+      } finally {
+        try { sel.removeAllRanges() } catch {}
+      }
+    }, 30)
+  }
+}
 
 const congenitalCases: Case[] = standardPedsMurmurs.map((m, i) => {
   const pool = standardPedsMurmurs.map(x => x.name)
@@ -1473,57 +1529,7 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
       ?? (container.querySelector('p') as HTMLParagraphElement | null)
   }
 
-  class CaseHighlighter {
-    private root: HTMLParagraphElement
-    private enabled = true
-    private onEndBound = (ev: Event) => this.onEnd(ev)
-    constructor(root: HTMLParagraphElement) {
-      this.root = root
-      root.addEventListener('pointerup', this.onEndBound, { passive: true } as any)
-      root.addEventListener('touchend', this.onEndBound, { passive: true } as any)
-    }
-    enable() { this.enabled = true }
-    disable() { this.enabled = false }
-    clear() {
-      // unwrap created highlight spans and remove residual class styling
-      const spans = this.root.querySelectorAll<HTMLSpanElement>('span[data-hl=\"1\"], span.neon-highlight')
-      spans.forEach(span => {
-        const parent = span.parentNode as HTMLElement | null
-        while (span.firstChild) parent?.insertBefore(span.firstChild, span)
-        parent?.removeChild(span)
-      })
-      this.root.querySelectorAll<HTMLElement>('.neon-highlight').forEach(el => el.classList.remove('neon-highlight'))
-      try { window.getSelection()?.removeAllRanges() } catch {}
-    }
-    dispose() {
-      this.disable()
-      this.root.removeEventListener('pointerup', this.onEndBound as any)
-      this.root.removeEventListener('touchend', this.onEndBound as any)
-    }
-    private onEnd(_ev: Event) {
-      if (!this.enabled) return
-      window.setTimeout(() => {
-        const sel = window.getSelection()
-        if (!sel || sel.isCollapsed || sel.rangeCount === 0) return
-        const range = sel.getRangeAt(0)
-        if (!this.root.contains(range.commonAncestorContainer)) return
-        try {
-          const span = document.createElement('span')
-          span.className = 'neon-highlight'
-          span.setAttribute('data-hl', '1')
-          try {
-            range.surroundContents(span)
-          } catch {
-            const contents = range.extractContents()
-            span.appendChild(contents)
-            range.insertNode(span)
-          }
-        } finally {
-          try { sel.removeAllRanges() } catch {}
-        }
-      }, 30)
-    }
-  }
+  // CaseHighlighter is module-scoped above
 
   // Reset highlight state and remove previous marks when case changes
   useEffect(() => {
@@ -2081,6 +2087,180 @@ function ECGBar() {
   )
 }
 
+function ShuffleRound() {
+  // Build flashcards from catalog: phrase + site on front, answer + banner on back
+  const items = useMemo(() => {
+    const pick = [
+      'Aortic Stenosis','Hypertrophic Obstructive Cardiomyopathy','Mitral Regurgitation',
+      'Tricuspid Regurgitation','Ventricular Septal Defect','Aortic Regurgitation',
+      'Mitral Stenosis','Patent Ductus Arteriosus','Innocent (Still’s) Murmur','Normal Heart Sounds'
+    ]
+    const locus: Record<string, string> = {
+      'Aortic Stenosis': 'RUSB (2nd right ICS), radiates to carotids',
+      'Hypertrophic Obstructive Cardiomyopathy': 'LSE (3rd–4th ICS), louder on Valsalva/standing',
+      'Mitral Regurgitation': 'Apex, radiates to axilla',
+      'Tricuspid Regurgitation': 'LLSB, increases with inspiration',
+      'Ventricular Septal Defect': 'LLSB, harsh with thrill',
+      'Aortic Regurgitation': 'LSE, early diastolic decrescendo (sitting forward, expiration)',
+      'Mitral Stenosis': 'Apex (bell), opening snap + mid‑diastolic rumble (LLD)',
+      'Patent Ductus Arteriosus': 'Left infraclavicular, continuous “machinery‑like”',
+      'Innocent (Still’s) Murmur': 'LLSB, soft musical, posture‑dependent',
+      'Normal Heart Sounds': 'Physiologic S1/S2; inspiratory split of S2'
+    }
+    const phrases: Record<string, string> = {
+      'Aortic Stenosis': 'Radiates to carotids; slow‑rising pulse',
+      'Hypertrophic Obstructive Cardiomyopathy': 'Louder with Valsalva/standing',
+      'Mitral Regurgitation': 'Blowing pansystolic; axillary radiation',
+      'Tricuspid Regurgitation': 'Inspiration increases intensity (Carvallo)',
+      'Ventricular Septal Defect': 'Harsh holosystolic at LLSB with thrill',
+      'Aortic Regurgitation': 'Early diastolic decrescendo at LSE',
+      'Mitral Stenosis': 'Opening snap + mid‑diastolic rumble',
+      'Patent Ductus Arteriosus': 'Machine‑like continuous murmur',
+      'Innocent (Still’s) Murmur': 'Soft, musical, no radiation',
+      'Normal Heart Sounds': 'Baseline reference; no added sounds'
+    }
+    const bannerByName: Record<string, string> = {
+      'Normal Heart Sounds': 'banner-normal.jpg',
+      'Aortic Stenosis': 'banner-as.jpg',
+      'Hypertrophic Obstructive Cardiomyopathy': 'banner-hocm.jpg',
+      'Mitral Regurgitation': 'banner-mr.jpg',
+      'Tricuspid Regurgitation': 'banner-tr.jpg',
+      'Ventricular Septal Defect': 'banner-vsd.jpg',
+      'Aortic Regurgitation': 'banner-ar.jpg',
+      'Mitral Stenosis': 'banner-ms.jpg',
+      'Patent Ductus Arteriosus': 'banner-pda.jpg',
+      'Innocent (Still’s) Murmur': 'banner-innocent.jpg',
+    }
+    const base = pick.map(name => ({
+      id: `sh-${name.replace(/[^a-z]/gi,'').toLowerCase()}`,
+      prompt: `${phrases[name]} — Site: ${locus[name]}`,
+      answer: name,
+      banner: `/images/banners/${bannerByName[name] ?? 'banner-normal.jpg'}`
+    }))
+    for (let i = base.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[base[i], base[j]] = [base[j], base[i]]
+    }
+    return base
+  }, [])
+  const [idx, setIdx] = useState(0)
+  const [flipped, setFlipped] = useState(false)
+  const [dance, setDance] = useState(false)
+  const current = items[idx]
+  function next() {
+    setFlipped(false)
+    setDance(false)
+    setIdx(i => (i + 1) % items.length)
+  }
+  function prev() {
+    setFlipped(false)
+    setDance(false)
+    setIdx(i => (i - 1 + items.length) % items.length)
+  }
+  return (
+    <div className="h-full flex flex-col">
+      <div className="mx-auto max-w-4xl w-full px-6 pt-6">
+        <div className="mb-4">
+          <Mentor text="Active recall. Read the cue, commit your answer, flip to check. Build rapid pattern recognition." />
+        </div>
+        <div className="rounded-xl overflow-hidden border border-white/10 bg-white/5">
+          <div className="p-5 grid gap-5">
+            <div className="mx-auto w-full max-w-xl">
+              <div
+                className={`relative w-full aspect-[4/3] rounded-xl border border-white/10 bg-white/5 cursor-pointer transition-transform duration-500 [transform-style:preserve-3d] ${flipped ? '[transform:rotateY(180deg)]' : ''}`}
+                onClick={()=> setFlipped(v=>!v)}
+              >
+                <div className="absolute inset-0 p-6 [backface-visibility:hidden] flex flex-col justify-center">
+                  <div className="grid place-items-center mb-1">
+                    {/* Small neon heart icon above cue */}
+                    <svg viewBox="0 0 120 120" className="w-10 h-10">
+                      <defs>
+                        <filter id="glow-heart-small" x="-50%" y="-50%" width="200%" height="200%">
+                          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                          <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                          </feMerge>
+                        </filter>
+                      </defs>
+                      <path
+                        d="M60 98 C 10 62, 10 26, 34 20 C 46 17, 56 23, 60 32 C 64 23, 74 17, 86 20 C 110 26, 110 62, 60 98 Z"
+                        fill="none"
+                        stroke="#22d3ee"
+                        strokeWidth="3"
+                        filter="url(#glow-heart-small)"
+                      />
+                      <path
+                        d="M60 98 C 10 62, 10 26, 34 20 C 46 17, 56 23, 60 32 C 64 23, 74 17, 86 20 C 110 26, 110 62, 60 98 Z"
+                        fill="none"
+                        stroke="#67e8f9"
+                        strokeWidth="1.2"
+                      />
+                    </svg>
+                  </div>
+                  <div className="text-emerald-300 font-semibold mb-2 text-center">Cue</div>
+                  <div className="text-lg leading-relaxed text-center">{current.prompt}</div>
+                  <div className="mt-3 text-xs text-slate-300 opacity-80 text-center">Tap to flip →</div>
+                </div>
+                <div className="absolute inset-0 p-6 [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-center">
+                  <div className="text-cyan-300 font-semibold mb-2 text-center">Answer</div>
+                  <div className="text-2xl font-bold text-center">{current.answer}</div>
+                  <div className="mt-3 text-xs text-slate-300 opacity-80 text-center">Tap to flip back →</div>
+                </div>
+              </div>
+            </div>
+            <div className="mx-auto flex items-center gap-3">
+              <button onClick={prev} className="px-3 py-1.5 rounded-md border border-white/10 bg-white/0 hover:bg-white/5">Back</button>
+              <button onClick={()=> setFlipped(true)} className="px-3 py-1.5 rounded-md border border-white/10 bg-white/0 hover:bg-white/5">Show answer</button>
+              <button onClick={next} className="px-3 py-1.5 rounded-md border border-white/10 bg-white/0 hover:bg-white/5">Next</button>
+            </div>
+            <div className="mx-auto">
+              <button
+                aria-label="Celebrate"
+                title="I got it right"
+                onClick={()=> setDance(true)}
+                className="w-20 h-20 rounded-full border border-cyan-400 text-cyan-200 bg-cyan-500/10 shadow-[0_0_16px_rgba(56,189,248,0.6)] hover:shadow-[0_0_22px_rgba(56,189,248,0.9)] grid place-items-center text-[10px] leading-tight text-center px-2"
+              >
+                I got it right!
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="mt-6 grid place-items-center min-h-[120px]">
+          {dance ? (
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: [1,1.1,1], rotate: [0,6,-6,0], y: [0,-6,0], opacity: 1 }}
+              transition={{ duration: 1.4, repeat: Infinity, repeatDelay: 0.2 }}
+              className="w-40 h-40"
+            >
+              <svg viewBox="0 0 120 120" className="w-full h-full">
+                <defs>
+                  <radialGradient id="g2" cx="50%" cy="50%" r="60%">
+                    <stop offset="0%" stopColor="#34d399" stopOpacity="0.6" />
+                    <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
+                  </radialGradient>
+                </defs>
+                <circle cx="60" cy="60" r="58" fill="url(#g2)" />
+                <circle cx="60" cy="45" r="18" fill="#c4f1f9" stroke="#22d3ee" strokeWidth="2" />
+                <circle cx="54" cy="42" r="3" fill="#0f172a" />
+                <circle cx="66" cy="42" r="3" fill="#0f172a" />
+                <path d="M52 48 Q60 54 68 48" stroke="#0ea5e9" strokeWidth="2" fill="none" />
+                <rect x="45" y="63" width="30" height="24" rx="8" fill="#22d3ee" stroke="#0ea5e9" strokeWidth="2" />
+                <line x1="45" y1="63" x2="35" y2="78" stroke="#22d3ee" strokeWidth="4" />
+                <line x1="75" y1="63" x2="85" y2="78" stroke="#22d3ee" strokeWidth="4" />
+                <line x1="52" y1="87" x2="48" y2="104" stroke="#22d3ee" strokeWidth="4" />
+                <line x1="68" y1="87" x2="72" y2="104" stroke="#22d3ee" strokeWidth="4" />
+              </svg>
+            </motion.div>
+          ) : (
+            <div className="text-xs text-slate-400">Mark correct to celebrate 🎉</div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
 function Progress({ r1, r2, onPrev: _onPrev }: { r1: number|null, r2: number|null, onPrev: () => void }) {
   const s1 = r1 ?? 0
   const s2 = r2 ?? 0
