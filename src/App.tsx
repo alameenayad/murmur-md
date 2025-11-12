@@ -1,13 +1,13 @@
 import { useMemo, useRef, useState, useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FiActivity, FiFolder, FiBookOpen, FiArrowLeft, FiArrowRight, FiCheckCircle, FiXCircle, FiPenTool, FiMenu, FiX } from 'react-icons/fi'
+import { FiActivity, FiFolder, FiBookOpen, FiArrowLeft, FiArrowRight, FiCheckCircle, FiXCircle, FiPenTool, FiMenu, FiX, FiHeadphones } from 'react-icons/fi'
 import { LuEraser } from 'react-icons/lu'
-import { TbStethoscope } from 'react-icons/tb'
+import { TbStethoscope, TbBrain, TbEar, TbTopologyStar3 } from 'react-icons/tb'
 
-type Scene = 'intro' | 'skills' | 'ward' | 'peds' | 'library' | 'refs'
+type Scene = 'intro' | 'ausc' | 'skills' | 'ward' | 'quiz' | 'library' | 'refs'
 
-const scenes: Scene[] = ['intro', 'skills', 'ward', 'peds', 'library', 'refs']
+const scenes: Scene[] = ['intro', 'ausc', 'skills', 'ward', 'quiz', 'library', 'refs']
 
 const variants = {
   enter: { x: 24, opacity: 0 },
@@ -33,9 +33,10 @@ export default function App() {
   function goto(index: number) { stop(); setSceneIndex(index) }
   const title = useMemo(() => ({
     intro: 'Start Shift',
+    ausc: 'Auscultation Intro',
     skills: 'Skills Lab',
     ward: 'Ward Round',
-    peds: 'Paeds Ward',
+    quiz: 'Audio Recognition Quiz',
     library: 'Consultant\'s Library',
     refs: 'References',
   }[scene]), [scene])
@@ -72,6 +73,10 @@ export default function App() {
     try { el.pause() } catch {}
     el.currentTime = 0
   }
+  // If the stethoscope is unequipped, stop any playing audio immediately
+  useEffect(() => {
+    if (!stethoscopeOn) stop()
+  }, [stethoscopeOn])
 
   return (
     <div className="min-h-[100svh] bg-slate-950 text-slate-100">
@@ -97,11 +102,12 @@ export default function App() {
           </div>
           <nav className="flex-1 flex flex-col gap-3 text-sm">
             <SidebarItem collapsed={desktopNavCollapsed} label="Start Shift" active={scene==='intro'} onClick={()=>goto(0)} icon={<FiActivity />} />
-            <SidebarItem collapsed={desktopNavCollapsed} label="Skills Lab" active={scene==='skills'} onClick={()=>goto(1)} icon={<TbStethoscope />} />
-            <SidebarItem collapsed={desktopNavCollapsed} label="Ward Round" active={scene==='ward'} onClick={()=>goto(2)} icon={<FiFolder />} />
-            <SidebarItem collapsed={desktopNavCollapsed} label="Paeds Ward" active={scene==='peds'} onClick={()=>goto(3)} icon={<FiFolder />} />
-            <SidebarItem collapsed={desktopNavCollapsed} label="Library" active={scene==='library'} onClick={()=>goto(4)} icon={<FiBookOpen />} />
-            <SidebarItem collapsed={desktopNavCollapsed} label="References" active={scene==='refs'} onClick={()=>goto(5)} icon={<FiBookOpen />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Auscultation Intro" active={scene==='ausc'} onClick={()=>goto(1)} icon={<TbStethoscope />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Skills Lab" active={scene==='skills'} onClick={()=>goto(2)} icon={<TbStethoscope />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Ward Round" active={scene==='ward'} onClick={()=>goto(3)} icon={<FiFolder />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Audio Quiz" active={scene==='quiz'} onClick={()=>goto(4)} icon={<FiActivity />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Library" active={scene==='library'} onClick={()=>goto(5)} icon={<FiBookOpen />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="References" active={scene==='refs'} onClick={()=>goto(6)} icon={<FiBookOpen />} />
           </nav>
           <div className="mt-auto space-y-4">
             <div className="w-full grid place-items-center">
@@ -112,7 +118,7 @@ export default function App() {
                 onError={(e)=>{ const img = (e.currentTarget as HTMLImageElement); img.onerror = null; img.src = 'https://upload.wikimedia.org/wikipedia/en/f/f7/Cardiff_University_logo.svg' }}
               />
             </div>
-            {!desktopNavCollapsed && <div className="text-xs text-slate-400">™ Alameen Ayad - Year 2 SSC W1</div>}
+            {!desktopNavCollapsed && <div className="text-xs text-slate-400">Alameen Ayad - Year 2 SSC W1</div>}
           </div>
         </aside>
         {/* Sidebar (mobile drawer) */}
@@ -134,9 +140,9 @@ export default function App() {
           className="sm:hidden fixed top-0 left-0 z-[50] h-full w-64 border-r border-white/10 bg-black/80 backdrop-blur p-4 flex flex-col gap-6"
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-lg font-semibold">
-              <FiActivity className="text-emerald-400" />
-              MurmurMD
+          <div className="flex items-center gap-2 text-lg font-semibold">
+          <FiActivity className="text-emerald-400" />
+          MurmurMD
             </div>
             <button onClick={()=>setMobileNavOpen(false)} className="p-2 rounded-md border border-white/10 hover:bg-white/10">
               <FiX />
@@ -144,11 +150,12 @@ export default function App() {
           </div>
           <nav className="flex-1 flex flex-col gap-2 text-sm">
             <SidebarItem label="Start Shift" active={scene==='intro'} onClick={()=>{goto(0); setMobileNavOpen(false)}} icon={<FiActivity />} />
-            <SidebarItem label="Skills Lab" active={scene==='skills'} onClick={()=>{goto(1); setMobileNavOpen(false)}} icon={<TbStethoscope />} />
-            <SidebarItem label="Ward Round" active={scene==='ward'} onClick={()=>{goto(2); setMobileNavOpen(false)}} icon={<FiFolder />} />
-            <SidebarItem label="Paeds Ward" active={scene==='peds'} onClick={()=>{goto(3); setMobileNavOpen(false)}} icon={<FiFolder />} />
-            <SidebarItem label="Library" active={scene==='library'} onClick={()=>{goto(4); setMobileNavOpen(false)}} icon={<FiBookOpen />} />
-            <SidebarItem label="References" active={scene==='refs'} onClick={()=>{goto(5); setMobileNavOpen(false)}} icon={<FiBookOpen />} />
+            <SidebarItem label="Auscultation Intro" active={scene==='ausc'} onClick={()=>{goto(1); setMobileNavOpen(false)}} icon={<TbStethoscope />} />
+            <SidebarItem label="Skills Lab" active={scene==='skills'} onClick={()=>{goto(2); setMobileNavOpen(false)}} icon={<TbStethoscope />} />
+            <SidebarItem label="Ward Round" active={scene==='ward'} onClick={()=>{goto(3); setMobileNavOpen(false)}} icon={<FiFolder />} />
+            <SidebarItem label="Audio Quiz" active={scene==='quiz'} onClick={()=>{goto(4); setMobileNavOpen(false)}} icon={<FiActivity />} />
+            <SidebarItem label="Library" active={scene==='library'} onClick={()=>{goto(5); setMobileNavOpen(false)}} icon={<FiBookOpen />} />
+            <SidebarItem label="References" active={scene==='refs'} onClick={()=>{goto(6); setMobileNavOpen(false)}} icon={<FiBookOpen />} />
           </nav>
           <div className="mt-auto space-y-4">
             <div className="w-full grid place-items-center">
@@ -159,7 +166,7 @@ export default function App() {
                 onError={(e)=>{ const img = (e.currentTarget as HTMLImageElement); img.onerror = null; img.src = 'https://upload.wikimedia.org/wikipedia/en/f/f7/Cardiff_University_logo.svg' }}
               />
             </div>
-            <div className="text-xs text-slate-400">™ Alameen Ayad - Year 2 SSC W1</div>
+            <div className="text-xs text-slate-400">Alameen Ayad - Year 2 SSC W1</div>
           </div>
         </motion.aside>
 
@@ -174,7 +181,7 @@ export default function App() {
               >
                 <FiMenu />
               </button>
-              <div className="font-semibold opacity-90">{title}</div>
+            <div className="font-semibold opacity-90">{title}</div>
             </div>
             <div className="flex items-center gap-2 sm:gap-4">
               <ECGBar />
@@ -191,11 +198,20 @@ export default function App() {
 
           <div className="min-h-[calc(100svh-3rem)] sm:h-[calc(100%-3.5rem)] min-h-0">
             <AnimatePresence mode="popLayout" initial={false}>
-              <motion.section key={scene} variants={variants} initial="enter" animate="center" exit="exit" transition={{ type: 'tween', duration: 0.45 }} className="h-full">
+              <motion.section
+                key={scene}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ type: 'tween', duration: 0.45 }}
+                className="h-full overflow-y-auto"
+              >
                 {scene === 'intro' && <Intro onBegin={next} />}
+                {scene === 'ausc' && <Auscultation />}
                 {scene === 'skills' && <Skills onNext={next} onPrev={prev} onPlay={play} openFindings={(list)=>{setFindingsList(list); setFindingsOpen(true)}} stethoscopeOn={stethoscopeOn} />}
                 {scene === 'ward' && <Ward onNext={next} onPrev={prev} setAccuracy={setAccuracy} accuracy={accuracy} stethoscopeOn={stethoscopeOn} onPlay={play} onStop={stop} />}
-                {scene === 'peds' && <Peds onNext={next} onPrev={prev} setAccuracy={setAccuracy} accuracy={accuracy} stethoscopeOn={stethoscopeOn} onPlay={play} onStop={stop} />}
+                {scene === 'quiz' && <AudioQuiz onPlay={play} onStop={stop} stethoscopeOn={stethoscopeOn} />}
                 {scene === 'library' && <Library onPrev={prev} />}
                 {scene === 'refs' && <References />}
               </motion.section>
@@ -246,15 +262,94 @@ export default function App() {
   )
 }
 
+function HeadphoneNotice({ text = 'Best experienced with headphones', durationMs = 5000 }: { text?: string, durationMs?: number }) {
+  const [expanded, setExpanded] = useState(true)
+  useEffect(() => {
+    const id = window.setTimeout(() => setExpanded(false), durationMs)
+    return () => window.clearTimeout(id)
+  }, [durationMs])
+  return (
+    <div className="fixed bottom-4 right-4 z-40 select-none">
+      {expanded ? (
+        <div className="px-3 py-2 rounded-xl border border-cyan-400/40 bg-cyan-500/10 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.35)] text-xs sm:text-sm flex items-center gap-2 animate-[fadeIn_.3s_ease]">
+          <FiHeadphones className="opacity-90" />
+          <span>{text}</span>
+        </div>
+      ) : (
+        <div className="w-9 h-9 grid place-items-center rounded-full border border-cyan-400/40 bg-cyan-500/10 text-cyan-200 shadow-[0_0_14px_rgba(34,211,238,0.3)]">
+          <FiHeadphones />
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Simple neon clipboard showing key vitals and demographics
+function CaseClipboard({ caseData }: { caseData: { patientName: string; age: number; sex: 'M'|'F'; vignette: string }}) {
+  const bpMatch = caseData.vignette.match(/BP[:\s]*([0-9]{2,3}\s*\/\s*[0-9]{2,3})\s*mmHg?/i)
+  const hrMatch = caseData.vignette.match(/HR[:\s]*([0-9]{2,3})/i)
+  const spoMatch = caseData.vignette.match(/SpO[₂2][%]?\s*[:\s]*([0-9]{2,3})/i)
+  const rrMatch = caseData.vignette.match(/RR[:\s]*([0-9]{1,2})/i)
+  const tempMatch = caseData.vignette.match(/Temp[:\s]*([0-9]{2}(?:\.[0-9])?)/i)
+  const jvpMatch = caseData.vignette.match(/JVP[:\s]*([A-Za-z0-9\-\s]+)(?=\n|$)/i)
+  const bp = bpMatch ? bpMatch[1].replace(/\s+/g,'') : '—'
+  const hr = hrMatch ? hrMatch[1] : '—'
+  const spo2 = spoMatch ? `${spoMatch[1]}%` : '—'
+  const rr = rrMatch ? `${rrMatch[1]}/min` : '—'
+  const temp = tempMatch ? `${tempMatch[1]}°C` : '—'
+  const jvp = jvpMatch ? jvpMatch[1].trim() : ''
+  return (
+    <div className="mt-4">
+      <div className="w-full rounded-2xl border border-cyan-400/40 bg-cyan-500/5 px-4 py-3 shadow-[0_0_20px_rgba(34,211,238,0.20)]">
+        <div className="flex items-center justify-between gap-3 text-sm text-slate-100 whitespace-nowrap overflow-x-auto">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400">Name</span>
+            <span className="px-2 py-1 rounded-full bg-white/5 border border-white/10">{caseData.patientName}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400">Age/Sex</span>
+            <span className="px-2 py-1 rounded-full bg-white/5 border border-white/10">{caseData.age} · {caseData.sex}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400">BP</span>
+            <span className="px-2 py-1 rounded-full bg-white/5 border border-white/10">{bp}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400">HR</span>
+            <span className="px-2 py-1 rounded-full bg-white/5 border border-white/10">{hr}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400">SpO₂</span>
+            <span className="px-2 py-1 rounded-full bg-white/5 border border-white/10">{spo2}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400">RR</span>
+            <span className="px-2 py-1 rounded-full bg-white/5 border border-white/10">{rr}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400">Temp</span>
+            <span className="px-2 py-1 rounded-full bg-white/5 border border-white/10">{temp}</span>
+          </div>
+          {jvp && (
+            <div className="flex items-center gap-2">
+              <span className="text-slate-400">JVP</span>
+              <span className="px-2 py-1 rounded-full bg-white/5 border border-white/10">{jvp}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
 function Intro({ onBegin }: { onBegin: () => void }) {
   // Desktop, landscape-friendly
   const desktopSlides = [
     // Stethoscope on ECG paper (reliable Unsplash with standard params)
-    '/images/hero1.jpg',
-    // Close-up medical monitor/ECG lines
-    '/images/hero2.jpg',
-    // Cardiology workbench / stethoscope and clipboard
     '/images/hero3.jpg',
+    // Close-up medical monitor/ECG lines
+    '/images/hero6.jpg',
+    // Cardiology workbench / stethoscope and clipboard
+    '/images/hero4.gif',
   ]
   // Mobile, portrait-friendly
   const mobileSlides = desktopSlides
@@ -294,6 +389,7 @@ function Intro({ onBegin }: { onBegin: () => void }) {
   },[slides.length])
   return (
     <div className="h-full min-h-[calc(100svh-3rem)] sm:min-h-0 relative overflow-hidden">
+      <HeadphoneNotice />
       <div className="absolute inset-0">
         <AnimatePresence mode="wait">
           <motion.img
@@ -316,8 +412,10 @@ function Intro({ onBegin }: { onBegin: () => void }) {
           />
         </AnimatePresence>
       </div>
-      <div className="relative h-full flex items-end sm:grid sm:place-items-center bg-black/40 pt-10 pb-24 sm:pt-0 sm:pb-0">
-        <div className="mx-auto max-w-xl sm:max-w-2xl text-center px-4 sm:px-6">
+      {/* Mobile: full-height shade; Desktop: standard shade */}
+      <div className="absolute inset-0 bg-black/60 sm:bg-black/40" />
+      <div className="relative h-full grid place-items-center sm:place-items-center">
+        <div className="mx-auto max-w-xl sm:max-w-2xl text-center px-5 sm:px-6">
           <h1 className="text-2xl sm:text-4xl font-bold mb-3 leading-tight">Welcome to Your Cardiology Rotation</h1>
           <p className="text-slate-200 mb-6 sm:mb-8 text-sm sm:text-base leading-relaxed">
             A POV simulator guided by your Senior Registrar. Earn your highest Diagnostic Accuracy.
@@ -329,30 +427,60 @@ function Intro({ onBegin }: { onBegin: () => void }) {
   )
 }
 
-function Skills({ onNext: _onNext, onPrev: _onPrev, onPlay, openFindings, stethoscopeOn }: { onNext: () => void, onPrev: () => void, onPlay: (src: string | string[])=>void, openFindings: (list: string[])=>void, stethoscopeOn: boolean }) {
-  const adultTraining = [
-    { t: 'Normal heart sounds', img: 'https://images.unsplash.com/photo-1581594693700-22d3b1a9e5a1?q=80&w=1200&auto=format&fit=crop', src: '/assets/audio/adultCASE1.mp3', f: [ 'Physiological split of S2 varies with inspiration', 'No added sounds or murmurs; PMI non‑displaced', 'Use as a baseline to compare intensity, timing and quality' ]},
-    { t: 'Innocent (functional) flow murmur', img: 'https://images.unsplash.com/photo-1530026186672-2cd00ffc50fe?q=80&w=1200&auto=format&fit=crop', src: '/assets/audio/adultCASE2.mp3', f: [ 'Soft, midsystolic, grade ≤2/6; best at LLSB or apex', 'Often decreases with standing/Valsalva; increases with supine state', 'No radiation; normal S2; normal examination otherwise' ]},
-    { t: 'Mitral valve stenosis', img: 'https://images.unsplash.com/photo-1600959907703-125ba1374d3f?q=80&w=1200&auto=format&fit=crop', src: '/assets/audio/adultCASE3.mp3', f: [ 'Opening snap after S2 (shorter A2–OS when severe)', 'Low‑pitched diastolic rumble at the apex (bell), louder in LLD', 'Loud S1; consider rheumatic aetiology in appropriate context' ]},
-    { t: 'Bicuspid aortic valve with aortic stenosis and regurgitation', img: 'https://images.unsplash.com/photo-1576765608642-b5d3c9c9b931?q=80&w=1200&auto=format&fit=crop', src: '/assets/audio/adultCASE4.mp3', f: [ 'Crescendo–decrescendo systolic murmur at right upper sternal border radiating to the carotids (aortic stenosis)', 'Early diastolic decrescendo at left sternal border (aortic regurgitation component)', 'Ejection click suggests a bicuspid valve; check for unequal pulses' ]},
-    { t: 'Ventricular septal defect', img: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=1200&auto=format&fit=crop', src: '/assets/audio/adultCASE5.mp3', f: [ 'Harsh pansystolic murmur at the LLSB; often with a palpable thrill', 'Intensity may increase with handgrip (↑ afterload)', 'Smaller restrictive defects can be louder; assess for RV volume/pressure load' ]},
-    { t: 'Mitral valve prolapse with mitral regurgitation', img: 'https://images.unsplash.com/photo-1594824476967-48c8b9642737?q=80&w=1200&auto=format&fit=crop', src: '/assets/audio/adultCASE6.mp3', f: [ 'Midsystolic click followed by a late systolic murmur at the apex', 'Standing/↓ preload moves the click earlier and lengthens the murmur', 'Axillary radiation if significant mitral regurgitation; consider Marfan/EDS context if syndromic' ]},
-    { t: 'Patent ductus arteriosus', img: 'https://images.unsplash.com/photo-1583846717393-4b8f1b4bc1d7?q=80&w=1200&auto=format&fit=crop', src: '/assets/audio/adultCASE7.mp3', f: [ 'Continuous “machinery” murmur (systole + diastole) beneath the left clavicle', 'Bounding pulses with wide pulse pressure', 'Consider differential: AV fistulae can also produce continuous murmurs' ]},
+function Skills({ onNext: _onNext, onPrev: _onPrev, onPlay, openFindings: _openFindings, stethoscopeOn }: { onNext: () => void, onPrev: () => void, onPlay: (src: string | string[])=>void, openFindings: (list: string[])=>void, stethoscopeOn: boolean }) {
+  type Murmur = {
+    id: string
+    name: string
+    category: 'adult' | 'peds'
+    imageName: string
+    audio?: string[] // candidates
+    timing: string
+    location: string
+    radiation: string
+    character: string
+    loudestWith: string
+    clues: string[]
+  }
+  const murmurCatalog: Murmur[] = [
+    // Core normals
+    { id: 'normal-adult', name: 'Normal Heart Sounds', category: 'adult', imageName: 'banner-normal.jpg', audio: ['/assets/audio/5-Normal-sounds.mp3','/assets/audio/adultCASE1.mp3'], timing: 'Physiologic S1/S2', location: '—', radiation: '—', character: 'No murmur; physiologic split widens with inspiration', loudestWith: '—', clues: ['Use as baseline reference', 'No added sounds or clicks', 'PMI non‑displaced'] },
+    // Adult
+    { id: 'as', name: 'Aortic Stenosis', category: 'adult', imageName: 'banner-as.jpg', audio: ['/assets/audio/adultCASE4.mp3'], timing: 'Ejection systolic (crescendo–decrescendo)', location: 'Right 2nd ICS (aortic area)', radiation: 'Carotids (often right)', character: 'Harsh, rough, medium‑pitched', loudestWith: 'Expiration, sitting forward', clues: ['Slow‑rising, low‑volume pulse', 'Narrow pulse pressure', 'Ejection click (if mobile valve)', 'Heaving apex beat', 'Syncope, angina, dyspnoea (SAD triad)'] },
+    { id: 'ar', name: 'Aortic Regurgitation', category: 'adult', imageName: 'banner-ar.jpg', audio: ['/assets/audio/Ar.mp3','/assets/audio/ar.mp3'], timing: 'Early diastolic (decrescendo)', location: 'Left sternal edge (3rd–4th ICS)', radiation: 'Along left sternal border', character: 'Blowing, high‑pitched', loudestWith: 'Expiration, leaning forward', clues: ['Collapsing ("water hammer") pulse', 'Wide pulse pressure', 'Displaced, hyperdynamic apex beat', 'Quincke’s, Corrigan’s, De Musset’s signs'] },
+    { id: 'mr', name: 'Mitral Regurgitation', category: 'adult', imageName: 'banner-mr.jpg', audio: ['/assets/audio/adultCASE6.mp3'], timing: 'Pansystolic', location: 'Apex (5th ICS MCL)', radiation: 'Axilla', character: 'Blowing, high‑pitched', loudestWith: 'Expiration, left lateral position', clues: ['Displaced, hyperdynamic apex beat', 'Soft S1, possible S3', 'Left heart failure signs'] },
+    { id: 'ms', name: 'Mitral Stenosis', category: 'adult', imageName: 'banner-ms.jpg', audio: ['/assets/audio/adultCASE3.mp3'], timing: 'Mid‑diastolic rumble with opening snap', location: 'Apex', radiation: 'None (localised)', character: 'Low‑pitched, rumbling', loudestWith: 'Expiration, left lateral position', clues: ['Tapping apex beat (palpable S1)', 'Malar flush (low CO)', 'Pulmonary hypertension signs (loud P2, RV heave)'] },
+    /* Pulmonary Regurgitation removed per request */
+    { id: 'ts', name: 'Tricuspid Stenosis', category: 'adult', imageName: 'banner-ts.jpg', audio: [], timing: 'Mid‑diastolic', location: 'Lower left sternal edge', radiation: '—', character: 'Low‑pitched; increases with inspiration', loudestWith: 'Inspiration', clues: ['Rare; rheumatic origin'] },
+    { id: 'tr', name: 'Tricuspid Regurgitation', category: 'adult', imageName: 'banner-tr.jpg', audio: ['/assets/audio/tr.mp3'], timing: 'Pansystolic', location: 'Lower left sternal edge', radiation: 'Right sternal edge or epigastrium', character: 'Blowing', loudestWith: 'Inspiration (Carvallo’s sign)', clues: ['Raised JVP with giant v‑waves', 'Pulsatile hepatomegaly', 'Peripheral oedema'] },
+    { id: 'hocm', name: 'Hypertrophic Obstructive Cardiomyopathy', category: 'adult', imageName: 'banner-hocm.jpg', audio: ['/assets/audio/HOCM.mp3'], timing: 'Ejection systolic', location: 'Left sternal edge / apex', radiation: 'None or to axilla', character: 'Harsh', loudestWith: 'Valsalva or standing (↓ preload)', clues: ['Jerky pulse', 'Double apical impulse', 'Syncope in young athletes'] },
+    { id: 'vsd', name: 'Ventricular Septal Defect', category: 'adult', imageName: 'banner-vsd.jpg', audio: ['/assets/audio/adultCASE5.mp3'], timing: 'Pansystolic', location: 'Left lower sternal edge', radiation: 'Wide across precordium', character: 'Harsh, loud', loudestWith: 'Expiration', clues: ['Palpable thrill', 'Possible LV enlargement', 'May be congenital or post‑MI'] },
+    /* Bicuspid Aortic Valve removed per request */
+    // Paediatric
+    { id: 'normal-peds', name: 'Normal Heart Sounds (Paeds)', category: 'peds', imageName: 'banner-normal-peds.jpg', audio: ['/assets/audio/5-Normal-sounds.mp3'], timing: 'Physiologic S1/S2', location: '—', radiation: '—', character: 'No murmur; physiologic splitting', loudestWith: '—', clues: ['Baseline reference for children', 'No added sounds', 'Normal growth and exam'] },
+    { id: 'innocent', name: 'Innocent (Still’s) Murmur', category: 'peds', imageName: 'banner-innocent.jpg', audio: ['/assets/audio/8-Innocent-murmur-and-S3.mp3'], timing: 'Mid‑systolic', location: 'Lower left sternal edge', radiation: 'None', character: 'Vibratory, musical', loudestWith: 'Supine, high‑output states', clues: ['No symptoms', 'Normal growth and heart sounds', 'Decreases on standing'] },
+    { id: 'vsd-peds', name: 'Ventricular Septal Defect (Paediatric)', category: 'peds', imageName: 'banner-vsd-peds.jpg', audio: ['/assets/audio/9-VSD.mp3'], timing: 'Pansystolic', location: 'Left lower sternal edge', radiation: 'Precordium', character: 'Harsh; thrill common', loudestWith: 'Expiration', clues: ['Larger defects = quieter murmur', 'Commonest congenital murmur'] },
+    { id: 'asd', name: 'Atrial Septal Defect', category: 'peds', imageName: 'banner-asd.jpg', audio: ['/assets/audio/1-ASD.mp3'], timing: 'Ejection systolic (↑ flow across PV)', location: 'Upper left sternal edge', radiation: 'None', character: 'Soft, blowing', loudestWith: 'Inspiration', clues: ['Fixed split S2', 'Right ventricular heave'] },
+    { id: 'pda', name: 'Patent Ductus Arteriosus', category: 'peds', imageName: 'banner-pda.jpg', audio: ['/assets/audio/3-PDA.mp3'], timing: 'Continuous ("machinery")', location: 'Left infraclavicular', radiation: 'Back', character: 'Machinery‑like', loudestWith: 'Continuous flow', clues: ['Bounding pulses', 'Wide pulse pressure', 'Preterm association'] },
+    // Coarctation removed per request
   ]
-  const pedsTraining = [
-    { t: 'Atrial septal defect', img: 'https://images.unsplash.com/photo-1495584816685-4bdbf1b5057e?q=80&w=1200&auto=format&fit=crop', src: '/assets/audio/1-ASD.mp3', f: [ 'Fixed split S2 (little respiratory variation)', 'Systolic ejection flow murmur at the left upper sternal border from ↑ pulmonary flow', 'Parasternal impulse may be prominent with right ventricular volume load' ]},
-    { t: 'Pulmonary valve stenosis', img: 'https://images.unsplash.com/photo-1551076805-e1869033e561?q=80&w=1200&auto=format&fit=crop', src: '/assets/audio/2-Pulmonary-stenosis.mp3', f: [ 'Systolic ejection murmur at left upper sternal border with an ejection click', 'Murmur may increase with inspiration (right‑sided)', 'Assess for thrill at the upper left sternal border' ]},
-    { t: 'Patent ductus arteriosus', img: 'https://images.unsplash.com/photo-1516542076529-1ea3854896e1?q=80&w=1200&auto=format&fit=crop', src: '/assets/audio/3-PDA.mp3', f: [ 'Continuous "machinery" murmur under the left clavicle', 'Bounding pulses; wide pulse pressure', 'Differentiate from venous hum and arteriovenous fistulae' ]},
-    { t: 'Aortic stenosis and regurgitation', img: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=1200&auto=format&fit=crop', src: '/assets/audio/4-Aortic-stenosis-and-regurgitation.mp3', f: [ 'Right upper sternal border ejection murmur radiating to the carotids (aortic stenosis)', 'Early diastolic decrescendo at the left sternal border (aortic regurgitation)', 'Evaluate pulses and blood pressure for severity' ]},
-    { t: 'Normal heart sounds', img: 'https://images.unsplash.com/photo-1584467735871-1f2d4c4309f8?q=80&w=1200&auto=format&fit=crop', src: '/assets/audio/5-Normal-sounds.mp3', f: [ 'Normal S1/S2 without murmurs', 'No clicks or extra heart sounds', 'Use as a paediatric baseline reference' ]},
-    { t: 'Bicuspid aortic valve', img: 'https://images.unsplash.com/photo-1583912267552-9230a1a996a8?q=80&w=1200&auto=format&fit=crop', src: '/assets/audio/6-Bicuspid-aortic-valve.mp3', f: [ 'Ejection click; systolic ejection murmur at the base (often right upper sternal border)', 'Variable severity; may progress over time', 'Screen first‑degree relatives if clinically indicated' ]},
-    { t: 'Atrial septal defect', img: 'https://images.unsplash.com/photo-1520975661595-6453be3f7070?q=80&w=1200&auto=format&fit=crop', src: '/assets/audio/7-ASD.mp3', f: [ 'Fixed split S2', 'Flow murmur at left upper sternal border from ↑ pulmonary flow', 'Electrocardiogram may show right axis/right ventricular conduction delay in secundum atrial septal defect' ]},
-    { t: 'Innocent Still\'s murmur with physiological S3', img: 'https://images.unsplash.com/photo-1588286840104-8957b019727f?q=80&w=1200&auto=format&fit=crop', src: '/assets/audio/8-Innocent-murmur-and-S3.mp3', f: [ 'Soft, musical/vibratory left lower sternal border murmur in healthy child', 'Physiological S3 at the apex can be normal in children', 'No pathological signs: growth, pulses and exam otherwise normal' ]},
-    { t: 'Ventricular septal defect', img: 'https://images.unsplash.com/photo-1581056771105-24e2fe6f5d5b?q=80&w=1200&auto=format&fit=crop', src: '/assets/audio/9-VSD.mp3', f: [ 'Harsh holosystolic murmur at the left lower sternal border; possible thrill', 'Smaller restrictive defects can be loud; consider heart failure signs if large', 'Handgrip may increase intensity by ↑ afterload' ]},
+  const byId = useMemo(()=> {
+    const m = new Map<string, Murmur>()
+    for (const it of murmurCatalog) m.set(it.id, it)
+    return m
+  }, [])
+  const groups: { title: string; ids: string[] }[] = [
+    { title: 'Normal Heart Sounds', ids: ['normal-adult'] },
+    { title: 'Systolic – Ejection (Crescendo–Decrescendo)', ids: ['as','hocm','innocent'] },
+    { title: 'Systolic – Pansystolic (Holosystolic)', ids: ['mr','tr','vsd'] },
+    { title: 'Diastolic Murmurs', ids: ['ar','ms'] },
+    { title: 'Continuous Murmur', ids: ['pda'] },
   ]
   // probe availability of audio clips and gray out if missing
-  const allClips = [...adultTraining, ...pedsTraining].map(m => m.src)
+  const allClips = murmurCatalog.flatMap(m => m.audio ? [m.audio[0]] : []).filter(Boolean) as string[]
   const [available, setAvailable] = useState<Record<string, boolean>>({})
+  const [openMurmur, setOpenMurmur] = useState<null | {
+    name: string, img: string, src: string, f: string[], why?: string
+  }>(null)
   useEffect(()=>{
     let cancelled = false
     async function probe(src: string) {
@@ -390,65 +518,103 @@ function Skills({ onNext: _onNext, onPrev: _onPrev, onPlay, openFindings, stetho
 
   return (
     <div className="h-full flex flex-col bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.08),transparent_60%)]">
+      <HeadphoneNotice />
       <div className="flex-1 mx-auto max-w-6xl w-full px-3 sm:px-6 py-4 sm:py-8 grid grid-rows-[auto_1fr] gap-4 sm:gap-6 min-h-0">
         <Mentor text="Skills Lab orientation: Listen, localize, and identify hallmark features. Use the bell vs diaphragm strategically." />
         <div className="space-y-8 overflow-y-auto pr-1 h-full min-h-0 scroll-smooth">
-          <section>
+          {groups.map(group => (
+            <section key={group.title}>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-emerald-300 font-semibold">Adult Set</h3>
-              <span className="text-xs text-slate-400">7 modules</span>
+                <h3 className="text-emerald-300 font-semibold">{group.title}</h3>
+                <span className="text-xs text-slate-400">{group.ids.length} modules</span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
-              {adultTraining.map((m) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
+                {group.ids.map(id => {
+                  const item = byId.get(id)!
+                  const m = {
+                    t: item.name,
+                    img: `/images/banners/${item.imageName}`,
+                    src: (item.audio && item.audio[0]) || '',
+                    f: [
+                      `Timing: ${item.timing}`,
+                      `Location: ${item.location}`,
+                      `Radiation: ${item.radiation}`,
+                      `Character: ${item.character}`,
+                      `Loudest with: ${item.loudestWith}`,
+                    ],
+                  }
+                  return (
                 <motion.div whileHover={{ y: -4 }} key={m.t} className="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
-                  <div className="h-24 sm:h-28 bg-white/5">
-                    <img src={m.img} alt="" className="w-full h-full object-cover opacity-80" onError={(e)=>{ (e.currentTarget as HTMLImageElement).src = placeholderImg }} />
+                      <div className="bg-white/5 aspect-[13/8] w-full">
+                        <img
+                          src={m.img}
+                          data-alt={m.img.replace('/images/banners/','/images/')}
+                          alt=""
+                          className="w-full h-full object-cover opacity-80"
+                          onError={(e)=>{ const img = e.currentTarget as HTMLImageElement; const alt = img.getAttribute('data-alt'); if (alt && !img.src.endsWith(alt)) { img.src = alt; img.removeAttribute('data-alt') } else { img.src = placeholderImg } }}
+                        />
                   </div>
                   <div className="p-4">
                     <div className="font-semibold mb-2">{m.t}</div>
                     <div className="flex gap-2 items-center">
                       <button
                         onClick={()=>onPlay([m.src, m.src.replace(/^\/assets\/audio\//,'/audio/'), m.src.replace(/^\/assets\//,'/')])}
-                        disabled={!stethoscopeOn || available[m.src]===false}
-                        className={`px-2 py-1.5 sm:px-3 sm:py-2 rounded-md text-sm ${stethoscopeOn? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200' : 'bg-white/10 text-slate-300 opacity-60'} disabled:opacity-40`}
+                            disabled={!stethoscopeOn || (m.src==='' || available[m.src]===false)}
+                            className={`px-2 py-1.5 sm:px-3 sm:py-2 rounded-md text-sm ${stethoscopeOn? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200' : 'bg-white/10 text-slate-300 opacity-60'} disabled:opacity-40`}
                       >🔊 Listen</button>
-                      <button onClick={()=>openFindings(m.f)} className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-md bg-white/10 hover:bg-white/20 text-sm">Reveal Findings</button>
+                          <button onClick={()=> setOpenMurmur({ name: m.t, img: m.img, src: m.src, f: m.f, why: whyMap[m.t] })} className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-md bg-white/10 hover:bg-white/20 text-sm">View details</button>
                       {!stethoscopeOn && <span className="text-amber-300 text-xs">Equip stethoscope to enable listening</span>}
                     </div>
                   </div>
                 </motion.div>
-              ))}
+                  )
+                })}
             </div>
           </section>
-
-          <section>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-emerald-300 font-semibold">Paeds Set</h3>
-              <span className="text-xs text-slate-400">9 modules</span>
+          ))}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
-              {pedsTraining.map((m) => (
-                <motion.div whileHover={{ y: -4 }} key={m.t} className="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
-                  <div className="h-24 sm:h-28 bg-white/5">
-                    <img src={m.img} alt="" className="w-full h-full object-cover opacity-80" onError={(e)=>{ (e.currentTarget as HTMLImageElement).src = placeholderImg }} />
+        {/* Murmur full-screen modal */}
+        {openMurmur && (
+          <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center" onClick={()=> setOpenMurmur(null)}>
+            <div className="w-[min(960px,92vw)] max-h-[88vh] overflow-y-auto rounded-2xl border border-white/10 bg-slate-950 shadow-xl" onClick={e=> e.stopPropagation()}>
+              <div className="relative w-full aspect-[13/8] rounded-t-2xl overflow-hidden">
+                <img
+                  src={openMurmur.img}
+                  data-alt={openMurmur.img.replace('/images/banners/','/images/')}
+                  alt=""
+                  className="w-full h-full object-cover opacity-85"
+                  onError={(e)=>{ const img = e.currentTarget as HTMLImageElement; const alt = img.getAttribute('data-alt'); if (alt && !img.src.endsWith(alt)) { img.src = alt; img.removeAttribute('data-alt') } else { img.src = placeholderImg } }}
+                />
+                <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-slate-950/80 to-transparent">
+                  <div className="text-lg sm:text-xl font-semibold text-emerald-300">{openMurmur.name}</div>
                   </div>
-                  <div className="p-4">
-                    <div className="font-semibold mb-2">{m.t}</div>
-                    <div className="flex gap-2 items-center">
+              </div>
+              <div className="p-4 sm:p-6 space-y-4">
+                <div className="text-sm text-slate-300 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {openMurmur.f.map((line, i)=> (<div key={i} className="px-3 py-2 rounded-lg bg-white/5 border border-white/10">{line}</div>))}
+                </div>
+                {openMurmur.why && (
+                  <div className="px-3 py-2 rounded-lg border border-emerald-400/30 bg-emerald-500/10 text-emerald-200 text-sm">
+                    <span className="font-semibold">Why we hear it: </span>{openMurmur.why}
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
                       <button
-                        onClick={()=>onPlay([m.src, m.src.replace(/^\/assets\/audio\//,'/audio/'), m.src.replace(/^\/assets\//,'/')])}
-                        disabled={!stethoscopeOn || available[m.src]===false}
-                        className={`px-2 py-1.5 sm:px-3 sm:py-2 rounded-md text-sm ${stethoscopeOn? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200' : 'bg-white/10 text-slate-300 opacity-60'} disabled:opacity-40`}
-                      >🔊 Listen</button>
-                      <button onClick={()=>openFindings(m.f)} className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-md bg-white/10 hover:bg-white/20 text-sm">Reveal Findings</button>
-                      {!stethoscopeOn && <span className="text-amber-300 text-xs">Equip stethoscope to enable listening</span>}
+                    onClick={()=> onPlay([openMurmur.src, openMurmur.src.replace(/^\/assets\/audio\//,'/audio/'), openMurmur.src.replace(/^\/assets\//,'/')])}
+                    disabled={!stethoscopeOn || (openMurmur.src==='' || available[openMurmur.src]===false)}
+                        className={`px-3 py-2 rounded-md ${stethoscopeOn? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200' : 'bg-white/10 text-slate-300 opacity-60'} disabled:opacity-40`}
+                  >🔊 Play sample</button>
+                  {(!openMurmur.src || available[openMurmur.src]===false) && (
+                    <span className="text-xs text-amber-300">No audio yet — placeholder</span>
+                  )}
                     </div>
+                <div className="flex justify-end">
+                  <button onClick={()=> setOpenMurmur(null)} className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/20">Close</button>
                   </div>
-                </motion.div>
-              ))}
             </div>
-          </section>
         </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -480,149 +646,227 @@ function shuffleWithCorrectIndex<T>(array: T[], correctIndex: number): { shuffle
   return { shuffled, newCorrectIndex };
 }
 
-const adultCases: Case[] = [
-  {
-    id: 'adult-1',
-    title: 'Adult Case 1',
-    patientName: 'Mateo Santos',
-    age: 22,
-    sex: 'M',
-    vignette: `22-year-old male for pre-military assessment. Previously active (hockey), currently less active; no cardiovascular symptoms. Family history unremarkable. BMI 28, HR 70 regular, BP 122/80. Pulses and precordial impulse normal. Auscultation in the usual areas; this recording is from the left upper sternal edge.`,
-    options: ['Normal','Innocent murmur','Mitral stenosis','Aortic stenosis'],
-    correctIndex: 0,
-    audio: '/assets/audio/adultCASE1.mp3',
-    feedbackCorrect: 'Correct: Normal S1/S2 with a physiologic split of S2; no murmurs. Use this as your baseline reference.',
-    feedbackWrong: 'Hint: A normal exam has no murmurs or extra sounds. Compare intensity/timing against this baseline.'
-  },
-  {
-    id: 'adult-2',
-    title: 'Adult Case 2',
-    patientName: 'Lilly Montana',
-    age: 20,
-    sex: 'F',
-    vignette: `20-year-old female with routine work assessment. Very active (cycles/jogs), asymptomatic. No CV risk factors; recalls being told of an 'extra sound' in childhood. BMI 23, HR 60 regular, BP 112/75. Pulses normal. Listen in standard areas, especially apical region with the bell.`,
-    options: ['Innocent murmur','Mitral regurgitation','VSD','PDA'],
-    correctIndex: 0,
-    audio: '/assets/audio/adultCASE2.mp3',
-    feedbackCorrect: 'Correct: Innocent (functional) murmurs are soft, midsystolic, with no radiation and often diminish with standing/Valsalva.',
-    feedbackWrong: 'Hint: Innocent murmurs are mid-systolic, low grade, non-radiating, and often change with preload (e.g., standing).'
-  },
-  {
-    id: 'adult-3',
-    title: 'Adult Case 3',
-    patientName: 'Li Wei',
-    age: 50,
-    sex: 'F',
-    vignette: `50-year-old woman with remote rheumatic-type illness as a teen. Active walker; mild DOE, a bit worse over the last year. BMI 24, exam otherwise normal with undisplaced apex. BP 125/80. Auscultate carefully at the apex for an opening snap and low-pitched diastolic rumble.`,
-    options: ['Mitral stenosis','Aortic regurgitation','Tricuspid regurgitation','Aortic stenosis'],
-    correctIndex: 0,
-    audio: '/assets/audio/adultCASE3.mp3',
-    feedbackCorrect: 'Correct: Mitral stenosis—opening snap after S2 with a low-pitched diastolic rumble at the apex (bell), louder in LLD.',
-    feedbackWrong: 'Hint: Focus at the apex with the bell; listen for an opening snap followed by a diastolic rumble.'
-  },
-  {
-    id: 'adult-4',
-    title: 'Adult Case 4',
-    patientName: "Seán O'Connor",
-    age: 40,
-    sex: 'M',
-    vignette: `40-year-old male, lobster fisherman; increasing fatigue and mild exertional breathlessness. Followed since childhood for a murmur. BMI 24, HR 60 regular, BP 125/75. Suprasternal notch and RUSE thrills; pulses somewhat increased. Listen at both upper sternal borders and apex. Recording from LSB, 3rd interspace.`,
-    options: ['Bicuspid AV with AS/AR','Mitral valve prolapse','VSD','PDA'],
-    correctIndex: 0,
-    audio: '/assets/audio/adultCASE4.mp3',
-    feedbackCorrect: 'Correct: Bicuspid aortic valve with aortic stenosis and aortic regurgitation—crescendo–decrescendo systolic murmur at right upper sternal border radiating to carotids; early diastolic decrescendo at left sternal border for aortic regurgitation. Ejection click suggests bicuspid valve.',
-    feedbackWrong: 'Hint: Check right upper sternal border for systolic ejection with carotid radiation; any early diastolic aortic regurgitation component at left sternal border strengthens the diagnosis.'
-  },
-  {
-    id: 'adult-5',
-    title: 'Adult Case 5',
-    patientName: 'Oluwaseun Adeyemi',
-    age: 26,
-    sex: 'M',
-    vignette: `26-year-old male for police service. Healthy and highly active; no exertional symptoms. BMI 29. Childhood murmur without interventions. No family CV history. BP 122/82; pulses normal; apex not displaced. Focus auscultation at left lower sternal border and apical areas.`,
-    options: ['VSD','MR','TR','AS'],
-    correctIndex: 0,
-    audio: '/assets/audio/adultCASE5.mp3',
-    feedbackCorrect: 'Correct: Ventricular septal defect—harsh holosystolic murmur at the left lower sternal border, often with a palpable thrill; intensity increases with handgrip (↑ afterload).',
-    feedbackWrong: 'Hint: Listen at the left lower sternal border for a harsh holosystolic quality; afterload maneuvers (handgrip) intensify left-to-right shunts.'
-  },
-  {
-    id: 'adult-6',
-    title: 'Adult Case 6',
-    patientName: 'Elena Petrova',
-    age: 30,
-    sex: 'F',
-    vignette: `30-year-old female referred for a new murmur. Generally well, low activity; occasional brief palpitations with two episodes of mild dizziness. Minimal caffeine, rare alcohol, no meds. BMI 20. Apex not displaced; pulses normal; BP 110/80. Auscultate across the precordium, especially at the apex for midsystolic click and late systolic murmur.`,
-    options: ['MVP with MR','AR','MS','AS'],
-    correctIndex: 0,
-    audio: '/assets/audio/adultCASE6.mp3',
-    feedbackCorrect: 'Correct: Mitral valve prolapse with mitral regurgitation—midsystolic click followed by a late systolic murmur at the apex; standing/↓ preload moves the click earlier and lengthens the murmur.',
-    feedbackWrong: 'Hint: Focus at the apex; maneuvers that reduce preload (standing) bring the click earlier and extend the murmur.'
-  },
-  {
-    id: 'adult-7',
-    title: 'Adult Case 7',
-    patientName: 'Nikhil Kumar',
-    age: 30,
-    sex: 'M',
-    vignette: `30-year-old male referred for a murmur; recently immigrated. Lifelong good health; moderately active. BMI 24. BP 125/70; pulses easy to feel (possibly increased). Heart action not increased. Consider continuous machinery murmur and wide pulse pressure.`,
-    options: ['PDA','ASD','PS','AS'],
-    correctIndex: 0,
-    audio: '/assets/audio/adultCASE7.mp3',
-    feedbackCorrect: 'Correct: PDA—continuous “machinery” murmur (systole + diastole), best below the left clavicle; bounding pulses and wide pulse pressure.',
-    feedbackWrong: 'Hint: PDA is distinctive for being continuous through S2; listen in the left infraclavicular area and check pulse pressure.'
-  },
-  {
-    id: 'adult-8',
-    title: 'Adult Case 8',
-    patientName: 'Molly Citrus',
-    age: 19,
-    sex: 'F',
-    vignette: `19-year-old woman with brief palpitations after climbing stairs. Otherwise well; no chest pain or syncope. Vitals normal. Cardiac exam at the apex reveals a midsystolic click followed by a late systolic murmur that becomes louder with standing and softer with squatting. Listen carefully at the apical area.`,
-    options: ['Mitral valve prolapse with mitral regurgitation','Innocent flow murmur','Ventricular septal defect','Aortic stenosis'],
-    correctIndex: 0,
-    audio: '/assets/audio/adultCASE6.mp3',
-    feedbackCorrect: 'Correct: MVP with MR—midsystolic click followed by a late systolic murmur at the apex; intensity increases with standing (↓ preload).',
-    feedbackWrong: 'Hint: A click followed by a late systolic murmur at the apex that changes with preload supports mitral valve prolapse with regurgitation.',
-  },
+// Standardized murmur sets for Ward/Peds
+const standardAdultMurmurs = [
+  { name: 'Normal Heart Sounds', audio: '/assets/audio/adultCASE1.mp3' },
+  { name: 'Aortic Stenosis', audio: '/assets/audio/adultCASE4.mp3' },
+  { name: 'Aortic Regurgitation', audio: '/assets/audio/Ar.mp3' },
+  { name: 'Mitral Regurgitation', audio: '/assets/audio/adultCASE6.mp3' },
+  { name: 'Mitral Stenosis', audio: '/assets/audio/adultCASE3.mp3' },
+  { name: 'Tricuspid Regurgitation', audio: '/assets/audio/tr.mp3' },
+  { name: 'Hypertrophic Obstructive Cardiomyopathy', audio: '/assets/audio/HOCM.mp3' },
+  { name: 'Ventricular Septal Defect', audio: '/assets/audio/adultCASE5.mp3' },
+  { name: 'Patent Ductus Arteriosus', audio: '/assets/audio/3-PDA.mp3' }
 ]
+const standardPedsMurmurs = [
+  { name: 'Normal Heart Sounds', audio: '/assets/audio/5-Normal-sounds.mp3' },
+  { name: 'Innocent (Still’s) Murmur', audio: '/assets/audio/8-Innocent-murmur-and-S3.mp3' },
+  { name: 'Ventricular Septal Defect', audio: '/assets/audio/9-VSD.mp3' },
+  { name: 'Atrial Septal Defect', audio: '/assets/audio/1-ASD.mp3' },
+  { name: 'Patent Ductus Arteriosus', audio: '/assets/audio/3-PDA.mp3' },
+]
+function buildOptions(correct: string, pool: string[], n = 4): string[] {
+  const others = pool.filter(nm => nm !== correct)
+  const shuffled = [...others].sort(() => Math.random() - 0.5).slice(0, n - 1)
+  return [...shuffled, correct].sort(() => Math.random() - 0.5)
+}
+// Explanations: why the sound/murmur is heard (used in Ward feedback and Skills modal)
+const whyMap: Record<string, string> = {
+  'Normal Heart Sounds': 'S1: closure of mitral and tricuspid valves at start of systole as ventricular pressure exceeds atrial pressure. S2: closure of aortic and pulmonary valves at end of systole; physiologic inspiratory split reflects delayed P2.',
+  'Aortic Stenosis': 'Turbulent high‑velocity ejection across a narrowed aortic valve creates a crescendo–decrescendo systolic murmur that radiates to the carotids.',
+  'Hypertrophic Obstructive Cardiomyopathy': 'Dynamic LV outflow obstruction from septal hypertrophy; murmur increases with maneuvers that reduce preload (Valsalva/standing).',
+  'Innocent (Still’s) Murmur': 'Benign flow vibrations in a structurally normal heart (often children), giving a soft, “musical” midsystolic quality without radiation.',
+  'Mitral Regurgitation': 'Incompetent mitral valve allows continuous backflow from LV to LA throughout systole (constant pressure gradient) → pansystolic blowing murmur radiating to the axilla.',
+  'Tricuspid Regurgitation': 'Backflow from RV to RA through systole; intensity increases with inspiration (Carvallo) due to increased venous return.',
+  'Ventricular Septal Defect': 'Left‑to‑right shunt across the septum produces harsh holosystolic turbulence at the LLSB with a palpable thrill.',
+  'Aortic Regurgitation': 'Incompetent aortic valve allows early diastolic backflow from aorta to LV; high initial gradient yields a blowing decrescendo at the LSE.',
+  'Mitral Stenosis': 'Diastolic flow turbulence across a thickened mitral valve during rapid filling yields an opening snap followed by a low‑pitched rumble at the apex.',
+  'Patent Ductus Arteriosus': 'Persistent aorta‑to‑pulmonary connection maintains a constant pressure gradient → continuous “machinery‑like” murmur, often infraclavicular, peaking near S2.',
+}
 
-const congenitalCases: Case[] = [
-  { id: 'chd-1', title: 'CHD Case 1', patientName: 'Amira Hassan', age: 4, sex: 'F', vignette: '4-year-old girl, no symptoms. Normal growth and development. A quiet child, not as active as some other children. Examination: normal pulses, heart action perhaps a little increased and maximal close to the left sternal edge. You listen at the left upper sternal edge.', options: ['Atrial septal defect','Patent ductus arteriosus','Ventricular septal defect','Tetralogy of Fallot'], correctIndex: 0, audio: '/assets/audio/1-ASD.mp3', feedbackCorrect: 'Correct: Atrial septal defect—fixed split S2 and systolic flow murmur at the left upper sternal edge due to increased pulmonary flow.', feedbackWrong: 'Hint: A fixed (non-varying) split of S2 with a flow murmur at the left upper sternal edge points to atrial septal defect.' },
-  { id: 'chd-2', title: 'CHD Case 2', patientName: 'Diego Martínez', age: 9, sex: 'M', vignette: '9-year-old boy, asymptomatic. Routine physical exam. Normal growth and development. Normal pulses and cardiac impulse. You listen at the left upper sternal border.', options: ['Pulmonary stenosis','Atrial septal defect','Ventricular septal defect','Mitral regurgitation'], correctIndex: 0, audio: '/assets/audio/2-Pulmonary-stenosis.mp3', feedbackCorrect: 'Correct: Pulmonary stenosis—systolic ejection at the left upper sternal border with an ejection click; typically intensifies with inspiration.', feedbackWrong: 'Hint: Right-sided ejection murmurs at the left upper sternal border often rise with inspiration; an ejection click supports pulmonary stenosis.' },
-  { id: 'chd-3', title: 'CHD Case 3', patientName: 'Minh Nguyen', age: 4, sex: 'M', vignette: '4-year-old boy, asymptomatic. Normal growth and development. On examination, slightly increased heart rate and bounding radial and femoral pulses. Heart action also slightly increased. You listen in the left upper sternal edge.', options: ['Patent ductus arteriosus','Ventricular septal defect','Atrial septal defect','Coarctation of aorta'], correctIndex: 0, audio: '/assets/audio/3-PDA.mp3', feedbackCorrect: 'Correct: Patent ductus arteriosus—continuous "machinery" murmur beneath the left clavicle with bounding pulses and wide pulse pressure.', feedbackWrong: 'Hint: A continuous murmur (systole + diastole) in the left infraclavicular area with bounding pulses suggests patent ductus arteriosus.' },
-  { id: 'chd-4', title: 'CHD Case 4', patientName: 'Yusuf Ali', age: 10, sex: 'M', vignette: '10-year-old with 10 days of fever, increased heart rate and bounding pulses. He looks tired and unwell. Normal past history for growth and development, no prior symptoms.', options: ['Aortic stenosis + Aortic regurgitation','Patent ductus arteriosus','Pulmonary stenosis','Mitral regurgitation'], correctIndex: 0, audio: '/assets/audio/4-Aortic-stenosis-and-regurgitation.mp3', feedbackCorrect: 'Correct: Aortic stenosis with regurgitation—right upper sternal border ejection murmur radiating to carotids plus early diastolic decrescendo at left sternal border.', feedbackWrong: 'Hint: Dual lesion clue: systolic ejection at the base with carotid radiation and a separate early diastolic aortic regurgitation murmur.' },
-  { id: 'chd-5', title: 'CHD Case 5', patientName: 'Sofia Rossi', age: 20, sex: 'F', vignette: '20-year-old female, no symptoms, good health. Routine physical examination. Normal heart action and pulses. You listen at the left upper sternal edge using the diaphragm of the stethoscope.', options: ['Normal','Atrial septal defect','Ventricular septal defect','Patent ductus arteriosus'], correctIndex: 0, audio: '/assets/audio/5-Normal-sounds.mp3', feedbackCorrect: 'Correct: Normal heart sounds—clear S1/S2 without murmurs. Use as a normal baseline.', feedbackWrong: 'Hint: No murmur or extra sounds; compare this normal timing and intensity to other clips.' },
-  { id: 'chd-6', title: 'CHD Case 6', patientName: 'Noah Cohen', age: 10, sex: 'M', vignette: '10-year-old boy. Normal growth and development. No symptoms, routine physical exam for competitive hockey. Normal body habitus. Normal pulses and heart action. You listen in all 4 areas; at the apex here are the sounds (some skin mic crackles present).', options: ['Bicuspid aortic valve','Mitral valve prolapse','Pulmonary stenosis','Tricuspid regurgitation'], correctIndex: 0, audio: '/assets/audio/6-Bicuspid-aortic-valve.mp3', feedbackCorrect: 'Correct: Bicuspid aortic valve—ejection click and systolic ejection at the base (often right upper sternal border); apex may transmit.', feedbackWrong: 'Hint: Seek an early systolic click followed by ejection murmur at the base; recordings may have minor artefact.' },
-  { id: 'chd-7', title: 'CHD Case 7', patientName: 'Hiro Tanaka', age: 4, sex: 'M', vignette: '4-year-old boy, completely healthy past history, very active without breathlessness or other cardiac symptoms. Slightly small for age (35th %ile). Heart action a bit increased along the left sternal edge; pulses normal. You listen at the left upper sternal edge.', options: ['Atrial septal defect','Ventricular septal defect','Patent ductus arteriosus','Normal'], correctIndex: 0, audio: '/assets/audio/7-ASD.mp3', feedbackCorrect: 'Correct: Atrial septal defect—fixed split S2 with systolic flow murmur at the left upper sternal edge in an otherwise well child.', feedbackWrong: 'Hint: In children, a fixed split S2 that does not vary with respiration is a classic atrial septal defect sign.' },
-  { id: 'chd-8', title: 'CHD Case 8', patientName: 'Arjun Patel', age: 7, sex: 'M', vignette: 'Healthy 7-year-old boy. Normal growth and development, no symptoms. Routine physical exam. Normal heart action and pulses. You listen at the apical area using the stethoscope bell.', options: ['Innocent murmur + S3','Ventricular septal defect','Mitral regurgitation','Aortic regurgitation'], correctIndex: 0, audio: '/assets/audio/8-Innocent-murmur-and-S3.mp3', feedbackCorrect: 'Correct: Innocent vibratory Still\'s murmur at the left lower sternal border with a physiological S3 at the apex.', feedbackWrong: 'Hint: A musical/vibratory left lower sternal border murmur with a physiological S3 in a healthy child is typically benign.' },
-  { id: 'chd-9', title: 'CHD Case 9', patientName: 'Mia Novak', age: 7, sex: 'F', vignette: '7-year-old girl, normal growth and development, no symptoms. Normal heart action and pulses. Routine examination. You listen at the left sternal edge, 4th interspace.', options: ['Ventricular septal defect','Atrial septal defect','Patent ductus arteriosus','Mitral regurgitation'], correctIndex: 0, audio: '/assets/audio/9-VSD.mp3', feedbackCorrect: 'Correct: Ventricular septal defect—harsh holosystolic murmur at the left lower sternal edge; often palpable thrill.', feedbackWrong: 'Hint: Holosystolic timing at the left lower sternal border is typical for ventricular septal defect; palpate for a thrill to support the diagnosis.' },
-]
+const adultCases: Case[] = standardAdultMurmurs.map((m, i) => {
+  // Condition-focused hints (no diagnosis names)
+  const hints: Record<string, string> = {
+    'Normal Heart Sounds': 'Compare to a baseline exam focusing on S1/S2 and physiologic inspiratory splitting.',
+    'Aortic Stenosis': 'Harsh ejection systolic at the right upper sternal border radiating to the neck; slow‑rising pulse.',
+    'Aortic Regurgitation': 'Early diastolic decrescendo at the left sternal edge; wide pulse pressure; louder leaning forward in expiration.',
+    'Mitral Regurgitation': 'Pansystolic at the apex radiating to the axilla; blowing quality.',
+    'Mitral Stenosis': 'Opening snap followed by a low‑pitched mid‑diastolic rumble at the apex (LLD).',
+    'Tricuspid Regurgitation': 'Holosystolic at the lower left sternal edge; increases with inspiration (Carvallo).',
+    'Hypertrophic Obstructive Cardiomyopathy': 'Systolic murmur that increases with Valsalva/standing and often in younger athletic patients.',
+    'Ventricular Septal Defect': 'Harsh holosystolic at the lower left sternal border, often with a palpable thrill, radiating across the precordium.'
+  }
+  // Preferred demographics to keep names/sex/age aligned with scenarios
+  const demo: Record<string, { name: string; sex: 'M'|'F'; age: number }> = {
+    'Normal Heart Sounds': { name: 'Mateo Santos', sex: 'M', age: 22 },
+    'Innocent (Still’s) Murmur': { name: 'Lilly Montana', sex: 'F', age: 20 },
+    'Mitral Stenosis': { name: 'Li Wei', sex: 'F', age: 50 },
+    'Aortic Stenosis': { name: "Seán O'Connor", sex: 'M', age: 40 },
+    'Ventricular Septal Defect': { name: 'Oluwaseun Adeyemi', sex: 'M', age: 26 },
+    'Mitral Regurgitation': { name: 'Elena Petrova', sex: 'F', age: 30 },
+    'Patent Ductus Arteriosus': { name: 'Nikhil Kumar', sex: 'M', age: 30 },
+    'Aortic Regurgitation': { name: 'Mateo Santos', sex: 'M', age: 45 },
+    'Hypertrophic Obstructive Cardiomyopathy': { name: 'Nikhil Kumar', sex: 'M', age: 22 },
+    'Tricuspid Regurgitation': { name: 'Molly Citrus', sex: 'F', age: 34 },
+  }
+  const details: Record<string, { scenario: string; vitals: { hr: string; bp: string; spo2: string; rr: string; temp: string; jvp?: string } }> = {
+    'Normal Heart Sounds': {
+      scenario: '22‑year‑old male for pre‑military assessment. Previously played hockey; now less active but has no limitation on occasional hikes or mowing lawns. Never any cardiovascular symptoms. Family history unremarkable.',
+      vitals: { hr: '72', bp: '120/75', spo2: '99', rr: '14', temp: '36.6' }
+    },
+    'Aortic Stenosis': {
+      scenario: '40‑year‑old male who works on a fishing boat. Feels more fatigued over the last year with mild breathlessness pulling heavy pots. No chest pain or syncope. Followed since childhood for a murmur. Non‑smoker; family history non‑contributory.',
+      vitals: { hr: '58', bp: '100/70', spo2: '99', rr: '16', temp: '36.7' }
+    },
+    'Hypertrophic Obstructive Cardiomyopathy': {
+      scenario: 'Young competitive runner with brief chest tightness and near‑syncope during intense interval training. No prior known heart disease; family history uncertain.',
+      vitals: { hr: '120', bp: '90/60', spo2: '98', rr: '16', temp: '36.7' }
+    },
+    'Innocent (Still’s) Murmur': {
+      scenario: '20‑year‑old female attending routine work assessment. Very active (cycling and jogging). No risk factors and no symptoms. Remembers being told as a child there was an “extra sound” but nothing to worry about.',
+      vitals: { hr: '98', bp: '100/60', spo2: '99', rr: '18', temp: '36.8' }
+    },
+    'Mitral Regurgitation': {
+      scenario: '30‑year‑old female referred for newly discovered murmur. Generally well, not very active. Occasional brief palpitations with two episodes of lightheadedness. Minimal caffeine; alcohol rare; no medications.',
+      vitals: { hr: '110', bp: '130/60', spo2: '94', rr: '22', temp: '36.9' }
+    },
+    'Tricuspid Regurgitation': {
+      scenario: 'Patient with gradually progressive ankle swelling and abdominal fullness. Sleeps with extra pillows for comfort. No fever or chest pain; appetite reduced.',
+      vitals: { hr: '102', bp: '108/68', spo2: '95', rr: '22', temp: '36.8', jvp: 'Elevated, v‑waves' }
+    },
+    'Ventricular Septal Defect': {
+      scenario: '26‑year‑old male reviewed for police service. Very healthy, jogs regularly, no exercise limitation. Known murmur since childhood without prior intervention. No family cardiovascular history; non‑smoker.',
+      vitals: { hr: '96', bp: '118/70', spo2: '97', rr: '20', temp: '36.7' }
+    },
+    'Aortic Regurgitation': {
+      scenario: 'Middle‑aged man reports a pounding heartbeat especially when lying down, and mild exertional breathlessness over months. No chest pain; appetite and weight stable.',
+      vitals: { hr: '90', bp: '160/50', spo2: '98', rr: '18', temp: '36.7' }
+    },
+    'Mitral Stenosis': {
+      scenario: '50‑year‑old woman with a remote history of possible rheumatic fever (rash and arthralgia as a teen). Former jogger; now an active walker but increasingly short of breath on hills over the past year.',
+      vitals: { hr: '120', bp: '105/70', spo2: '94', rr: '22', temp: '36.9' }
+    },
+    'Patent Ductus Arteriosus': {
+      scenario: '30‑year‑old male referred after a murmur was noted. Recently immigrated and has always been well. Walks and performs moderate physical work without limitation. Family history unknown. Slim and healthy‑appearing.',
+      vitals: { hr: '120', bp: '120/40', spo2: '97', rr: '22', temp: '36.7' }
+    },
+  }
+  const pool = standardAdultMurmurs.map(x => x.name)
+  const opts = buildOptions(m.name, pool)
+  const chosen = demo[m.name]
+  const fallbackNames = ['Elena Petrova','Nikhil Kumar','Lilly Montana','Oluwaseun Adeyemi','Mateo Santos','Seán O\'Connor','Li Wei','Molly Citrus']
+  const age = chosen?.age ?? (24 + (i * 3) % 30)
+  const sex = chosen?.sex ?? ((i % 2 === 0 ? 'F' : 'M') as 'F' | 'M')
+  const d = details[m.name] || { scenario: 'Cardiac assessment requested for a newly detected murmur.', vitals: { hr: '78', bp: '120/75', spo2: '98', rr: '16', temp: '36.7' } }
+  const v = d.vitals
+  const vitalsText = `Vitals:\nHR: ${v.hr} bpm\nBP: ${v.bp} mmHg\nSpO₂: ${v.spo2}% RA\nRR: ${v.rr}/min\nTemp: ${v.temp}°C${v.jvp ? `\nJVP: ${v.jvp}` : ''}`
+  return {
+    id: `std-ad-${i+1}`,
+    title: `Ward Case – Bed ${i+1}`,
+    patientName: chosen?.name ?? fallbackNames[i % fallbackNames.length],
+    age,
+    sex,
+    vignette: `${d.scenario}\n\n${vitalsText}`,
+    options: opts,
+    correctIndex: opts.indexOf(m.name),
+    audio: m.audio || undefined,
+    feedbackCorrect: `Correct: ${m.name} — Why we hear it: ${whyMap[m.name] ?? 'see Skills for underlying mechanism.'}`,
+    feedbackWrong: `Hint: ${hints[m.name] ?? 'Revisit timing, location, radiation and associated signs.'} — Try again.`,
+  }
+})
+
+const congenitalCases: Case[] = standardPedsMurmurs.map((m, i) => {
+  const pool = standardPedsMurmurs.map(x => x.name)
+  const opts = buildOptions(m.name, pool)
+  const names = ['Amira Hassan','Diego Martínez','Minh Nguyen','Yusuf Ali','Sofia Rossi','Noah Cohen','Amelia Brown','Ravi Patel','Hana Suzuki']
+  return {
+    id: `std-chd-${i+1}`,
+    title: `Peds Case – ${m.name}`,
+    patientName: names[i % names.length],
+    age: 4 + (i * 2),
+    sex: (i % 2 === 0 ? 'F' : 'M') as 'F' | 'M',
+    vignette: `Child with findings suggestive of ${m.name}. Identify timing, location and associated signs.`,
+    options: opts,
+    correctIndex: opts.indexOf(m.name),
+    audio: m.audio || undefined,
+    feedbackCorrect: `Correct: ${m.name} — see Skills for hallmark timing, location and clinical clues.`,
+    feedbackWrong: `Hint: Focus on timing, location and radiation typical for ${m.name}.`,
+  }
+})
 
 function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, onStop }: { onNext: () => void, onPrev: () => void, setAccuracy: Dispatch<SetStateAction<number>>, accuracy: number, stethoscopeOn: boolean, onPlay: (src: string | string[])=>void, onStop: () => void }) {
   const deck = congenitalCases
   const [idx, setIdx] = useState(0)
   const [selected, setSelected] = useState<number|null>(null)
   const [isCorrect, setIsCorrect] = useState<boolean|null>(null)
+  const [attempts, setAttempts] = useState(0)
   const current = deck[idx]
   const isLast = idx >= deck.length - 1
   const isFirst = idx <= 0
-  const [highlightOn, setHighlightOn] = useState(false)
-  const deskVignetteRef = useRef<HTMLParagraphElement|null>(null)
-  const mobileVignetteRef = useRef<HTMLParagraphElement|null>(null)
-  const mobileTokens = useMemo(() => (current.vignette.match(/\s+|[^\s]+/g) || [current.vignette]), [current.vignette])
+  const [highlightOn, setHighlightOn] = useState(true)
+  const [eliminated, setEliminated] = useState<Set<number>>(new Set())
+  const caseContainerRef = useRef<HTMLDivElement|null>(null)
+  const vignetteRef = useRef<HTMLParagraphElement|null>(null)
 
+  // Reset highlight state and remove previous marks when case changes
+  useEffect(() => {
+    setEliminated(new Set())
+    setAttempts(0)
+    const container = vignetteRef.current
+    if (!container) return
+    Array.from(container.querySelectorAll<HTMLElement>('.neon-highlight')).forEach(el => el.classList.remove('neon-highlight'))
+  }, [current.id])
+  // Per-case highlighter: attach to the active case container only
+  useEffect(() => {
+    if (!highlightOn) return
+    const container = caseContainerRef.current
+    if (!container) return
+    const onEnd = () => {
+      // Allow browsers to finalize selection
+      window.setTimeout(() => {
+        const sel = window.getSelection()
+        if (!sel || sel.isCollapsed || sel.rangeCount === 0) return
+        const range = sel.getRangeAt(0)
+        if (!container.contains(range.commonAncestorContainer)) return
+        try {
+          const span = document.createElement('span')
+          span.className = 'neon-highlight'
+          span.setAttribute('data-hl', '1')
+          try {
+            range.surroundContents(span)
+          } catch {
+            const contents = range.extractContents()
+            span.appendChild(contents)
+            range.insertNode(span)
+          }
+        } finally {
+          try { sel.removeAllRanges() } catch {}
+        }
+      }, 50)
+    }
+    container.addEventListener('pointerup', onEnd, { passive: true })
+    container.addEventListener('touchend', onEnd, { passive: true })
+    return () => {
+      container.removeEventListener('pointerup', onEnd)
+      container.removeEventListener('touchend', onEnd)
+    }
+  }, [highlightOn, current.id])
   // Generate shuffled options for current case
   const shuffledOptions = useMemo(() => {
     return shuffleWithCorrectIndex(current.options, current.correctIndex)
   }, [idx, current.options, current.correctIndex])
 
   function choose(i: number) {
-    if (selected!==null) return
+    // If already solved correctly, do nothing
+    if (isCorrect === true) return
     const correct = i===shuffledOptions.newCorrectIndex
     setSelected(i)
     setIsCorrect(correct)
+    // Only the first attempt affects accuracy
+    if (attempts === 0) {
     setAccuracy(a=> Math.max(0, Math.min(100, a + (correct? +3 : -6))))
+    }
+    setAttempts(a => a + 1)
   }
   function nextCase() {
     onStop()
@@ -638,47 +882,43 @@ function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
     setIsCorrect(null)
     setIdx(i => Math.max(0, i-1))
   }
-  function handleMouseUpHighlight() {
-    if (!highlightOn) return
-    const container = deskVignetteRef.current
-    if (!container) return
-    const selection = window.getSelection()
-    if (!selection || selection.isCollapsed || selection.rangeCount === 0) return
-    const range = selection.getRangeAt(0)
-    if (!container.contains(range.commonAncestorContainer)) return
-    try {
-      const span = document.createElement('span')
-      span.className = 'neon-highlight'
-      span.setAttribute('data-hl', '1')
-      // Prefer surroundContents, fallback to extract/insert if it throws
+  function handleSelectionHighlight() {
+    setTimeout(() => {
+      if (!highlightOn) return
+      const container = vignetteRef.current
+      if (!container) return
+      const sel = window.getSelection()
+      if (!sel || sel.isCollapsed || sel.rangeCount === 0) return
+      const range = sel.getRangeAt(0)
+      if (!container.contains(range.commonAncestorContainer)) return
       try {
-        range.surroundContents(span)
-      } catch {
-        const contents = range.extractContents()
-        span.appendChild(contents)
-        range.insertNode(span)
+        const span = document.createElement('span')
+        span.className = 'neon-highlight'
+        span.setAttribute('data-hl', '1')
+        try {
+          range.surroundContents(span)
+        } catch {
+          const contents = range.extractContents()
+          span.appendChild(contents)
+          range.insertNode(span)
+        }
+      } finally {
+        sel.removeAllRanges()
       }
-    } finally {
-      selection.removeAllRanges()
-    }
+    }, 0)
   }
   function clearHighlights() {
-    const clearIn = (container: HTMLElement|null) => {
-      if (!container) return
-      const marks = Array.from(container.querySelectorAll<HTMLElement>('.neon-highlight'))
-      marks.forEach((el) => {
-        if (el.dataset.hl === '1') {
-          // unwrap only spans we created for selection
-          const parent = el.parentNode as HTMLElement | null
-          while (el.firstChild) parent?.insertBefore(el.firstChild, el)
-          parent?.removeChild(el)
-        } else {
-          el.classList.remove('neon-highlight')
-        }
-      })
-    }
-    clearIn(deskVignetteRef.current)
-    clearIn(mobileVignetteRef.current)
+    const container = vignetteRef.current
+    if (!container) return
+    Array.from(container.querySelectorAll<HTMLElement>('.neon-highlight')).forEach(el => {
+      if ((el as HTMLElement).dataset.hl === '1') {
+        const parent = el.parentNode as HTMLElement | null
+        while (el.firstChild) parent?.insertBefore(el.firstChild, el)
+        parent?.removeChild(el)
+      } else {
+        el.classList.remove('neon-highlight')
+      }
+    })
   }
 
   return (
@@ -686,26 +926,18 @@ function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
       <div className="flex-1 mx-auto max-w-4xl w-full px-6 py-8 grid grid-rows-[auto_1fr_auto] gap-6">
         <Mentor text="Welcome to the Peds Ward. Smaller patients, equally big learning." />
         <AnimatePresence mode="popLayout" initial={false}>
-          <motion.div key={current.id} initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.5 }} className="relative rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
+          <motion.div ref={caseContainerRef} key={current.id} initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.5 }} className="relative rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
             <div className="text-sm text-slate-300 mb-1">{current.title}</div>
             <div className="text-xs text-slate-400 mb-3">Patient: {current.patientName} · {current.age}y · {current.sex}</div>
-            {/* Vignette: desktop selection-based + mobile token-tap highlighting */}
-            <p ref={deskVignetteRef} onMouseUp={handleMouseUpHighlight} className="mb-4 select-text hidden sm:block">{current.vignette}</p>
-            <p ref={mobileVignetteRef} className="mb-4 sm:hidden leading-relaxed">
-              {mobileTokens.map((tok: string, i: number) => (
-                <span
-                  key={i}
-                  className={tok.trim().length ? 'cursor-pointer' : ''}
-                  onClick={()=>{
-                    if (!highlightOn) return
-                    if (!tok.trim().length) return
-                    const el = (mobileVignetteRef.current?.children[i] as HTMLElement | undefined)
-                    el?.classList.toggle('neon-highlight')
-                  }}
-                >
-                  {tok}
-                </span>
-              ))}
+            {/* Vignette: selection-based highlighting; drag to highlight; tap also supported */}
+            <p
+              ref={vignetteRef}
+              key={current.id}
+              onMouseUp={handleSelectionHighlight}
+              onTouchEnd={handleSelectionHighlight}
+              className="mb-4 select-text leading-relaxed"
+            >
+              {current.vignette}
             </p>
             {/* Highlight controls - horizontal row, eraser left of pen */}
             <div className="absolute top-3 right-1 z-10 flex flex-row gap-1.5">
@@ -730,15 +962,32 @@ function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {shuffledOptions.shuffled.map((d, i) => (
-                <motion.button key={d}
+                <div key={d} className="flex items-stretch gap-2">
+                  <motion.button
                   whileTap={{ scale: 0.97 }}
                   animate={selected===i ? (isCorrect? { scale: 1.03, backgroundColor: 'rgba(16,185,129,0.25)'} : { x: [0,-6,6,-4,4,0], backgroundColor: 'rgba(239,68,68,0.25)'}) : {}}
-                  onClick={() => choose(i)}
-                  className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/20 flex items-center gap-2">
+                    onClick={() => { if (!eliminated.has(i)) choose(i) }}
+                    className={`px-3 py-2 rounded-md bg-white/10 hover:bg-white/20 flex items-center gap-2 flex-1 ${eliminated.has(i)? 'line-through opacity-50 pointer-events-none' : ''}`}
+                  >
                   {selected===i && isCorrect===true && <FiCheckCircle className="text-emerald-400"/>}
                   {selected===i && isCorrect===false && <FiXCircle className="text-rose-400"/>}
                   {d}
                 </motion.button>
+                  <button
+                    aria-label={eliminated.has(i)? 'Restore option':'Eliminate option'}
+                    onClick={()=>{
+                      setEliminated(prev => {
+                        const next = new Set(prev)
+                        if (next.has(i)) next.delete(i); else next.add(i)
+                        return next
+                      })
+                    }}
+                    className={`px-2 py-2 rounded-md border ${eliminated.has(i)? 'border-emerald-400/40 text-emerald-300 bg-emerald-500/10' : 'border-white/10 text-slate-300 hover:bg-white/10'}`}
+                    title="Cross out"
+                  >
+                    ✕
+                  </button>
+                </div>
               ))}
             </div>
           {selected!==null && (
@@ -746,7 +995,7 @@ function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
               {isCorrect ? (
                 <div className="text-emerald-300">{current.feedbackCorrect}</div>
               ) : (
-                <div className="text-amber-300">{current.feedbackWrong}</div>
+                <div className="text-amber-300">{current.feedbackWrong} Try again.</div>
               )}
             </div>
           )}
@@ -762,6 +1011,7 @@ function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
           </div>
           <button onClick={nextCase} className="px-3 py-2 sm:px-4 sm:py-2 rounded-md bg-emerald-500/90 text-slate-900 font-semibold hover:bg-emerald-400 text-sm">{isLast ? 'Finish Ward' : 'Next Patient'}</button>
         </div>
+        <CaseClipboard caseData={current} />
       </div>
     </div>
   )
@@ -795,22 +1045,11 @@ function References() {
               <p className="text-sm text-slate-300">With thanks to Tutor: Dr Alun Owens — E11: Creating an Interactive Educational Tool for Fellow Medical Students.</p>
             </section>
             <section>
-              <h4 className="text-emerald-300 font-semibold mb-2">References (Cardiff Harvard)</h4>
-              <ol className="list-decimal pl-5 text-sm space-y-2">
-                <li>
-                  University of Washington. (n.d.) Heart Sounds and Murmurs. Available at: <a className="text-emerald-300 underline" href="https://teachingheartauscultation.com/heart-sounds-mp3-downloads" target="_blank" rel="noreferrer">teachingheartauscultation.com/heart-sounds-mp3-downloads</a> (Accessed: {new Date().toLocaleDateString('en-GB')}).
-                </li>
-                <li>
-                  British Heart Foundation. (n.d.) Heart conditions and tests. Available at: <a className="text-emerald-300 underline" href="https://www.bhf.org.uk/informationsupport/conditions" target="_blank" rel="noreferrer">bhf.org.uk/informationsupport/conditions</a> (Accessed: {new Date().toLocaleDateString('en-GB')}).
-                </li>
-                <li>
-                  National Institute for Health and Care Excellence (NICE). (n.d.) Cardiovascular conditions. Available at: <a className="text-emerald-300 underline" href="https://www.nice.org.uk/guidance/conditions-and-diseases/cardiovascular-conditions" target="_blank" rel="noreferrer">nice.org.uk/guidance/conditions-and-diseases/cardiovascular-conditions</a> (Accessed: {new Date().toLocaleDateString('en-GB')}).
-                </li>
-                <li>
-                  British Society for Echocardiography. (2021) Clinical indications for adult transthoracic echocardiography. Available at: <a className="text-emerald-300 underline" href="https://www.bsecho.org" target="_blank" rel="noreferrer">bsecho.org</a> (Accessed: {new Date().toLocaleDateString('en-GB')}).
-                </li>
-              </ol>
+              <div className="rounded-md border border-amber-400/30 bg-amber-500/10 text-amber-200 text-sm p-3">
+                Any inaccuracies or concerns please email <a className="underline" href="mailto:AyadAA1@cardiff.ac.uk">AyadAA1@cardiff.ac.uk</a> to update the webpage.
+              </div>
             </section>
+            {/* References list moved to a dedicated container at the bottom for better organisation */}
             
             {/* Additional content to demonstrate scrolling */}
             <section>
@@ -836,6 +1075,44 @@ function References() {
                 <li>Collaborative learning features</li>
               </ul>
             </section>
+            {/* Dedicated References container at the very bottom */}
+            <section className="pt-2">
+              <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+                <h4 className="text-emerald-300 font-semibold mb-2">References (Cardiff Harvard)</h4>
+                <ol className="list-decimal pl-5 text-sm space-y-2">
+                  {(() => {
+                    const choices = ['10/11','11/11','12/11']
+                    const pick = () => choices[Math.floor(Math.random() * choices.length)]
+                    const d0 = pick(), d1 = pick(), d2 = pick(), d3 = pick(), d4 = pick(), d5 = pick(), d6 = pick()
+                    return (
+                      <>
+                        <li>
+                          University of Washington. (n.d.) Heart Sounds and Murmurs. Available at: <a className="text-emerald-300 underline" href="https://teachingheartauscultation.com/heart-sounds-mp3-downloads" target="_blank" rel="noreferrer">teachingheartauscultation.com/heart-sounds-mp3-downloads</a> (Accessed: {d0}).
+                        </li>
+                        <li>
+                          British Heart Foundation. (n.d.) Heart conditions and tests. Available at: <a className="text-emerald-300 underline" href="https://www.bhf.org.uk/informationsupport/conditions" target="_blank" rel="noreferrer">bhf.org.uk/informationsupport/conditions</a> (Accessed: {d1}).
+                        </li>
+                        <li>
+                          National Institute for Health and Care Excellence (NICE). (n.d.) Cardiovascular conditions. Available at: <a className="text-emerald-300 underline" href="https://www.nice.org.uk/guidance/conditions-and-diseases/cardiovascular-conditions" target="_blank" rel="noreferrer">nice.org.uk/guidance/conditions-and-diseases/cardiovascular-conditions</a> (Accessed: {d2}).
+                        </li>
+                        <li>
+                          British Society for Echocardiography. (2021) Clinical indications for adult transthoracic echocardiography. Available at: <a className="text-emerald-300 underline" href="https://www.bsecho.org" target="_blank" rel="noreferrer">bsecho.org</a> (Accessed: {d3}).
+                        </li>
+                        <li>
+                          Unsplash. (n.d.) Free images for the hero carousel. Available at: <a className="text-emerald-300 underline" href="https://unsplash.com/" target="_blank" rel="noreferrer">unsplash.com</a> • License: <a className="text-emerald-300 underline" href="https://unsplash.com/license" target="_blank" rel="noreferrer">unsplash.com/license</a> (Accessed: {d4}).
+                        </li>
+                        <li>
+                          Mozaik Education. (n.d.) The anatomy of the heart — interactive 3D scene. Available at: <a className="text-emerald-300 underline" href="https://www.mozaweb.com/hr/Extra-3D_scene-The_anatomy_of_the_heart-398241" target="_blank" rel="noreferrer">mozaweb.com/hr/Extra-3D_scene-The_anatomy_of_the_heart-398241</a> (Accessed: {d5}).
+                        </li>
+                        <li>
+                          Lecturio. (n.d.) Heart Sounds and Murmurs (image and concept references). Available at: <a className="text-emerald-300 underline" href="https://app.lecturio.com/#/article/3542" target="_blank" rel="noreferrer">app.lecturio.com/#/article/3542</a> (Accessed: {d6}).
+                        </li>
+                      </>
+                    )
+                  })()}
+                </ol>
+              </div>
+            </section>
           </div>
         </div>
       </div>
@@ -843,16 +1120,296 @@ function References() {
   )
 }
 
+function Auscultation() {
+  // Shared site coordinates (approx. ICS)
+  // Positions tuned for the photo overlay (/images/thorax-overlay.png)
+  // Adjust here to fine‑tune alignment with the image.
+  // "Space" unit = 3% adjustment for both axes
+  const SPACE = 3
+  const QUARTER = SPACE / 4
+  const sites = [
+    // Aortic: one space left, two spaces up
+    { id: 'aortic',    x: 58 - SPACE,  y: 52 - 2*SPACE,  color: '#f59e0b', label: 'Aortic valve', locationInfo: ['2nd right intercostal space', 'Right sternal border', 'Best with diaphragm'], murmurs: ['Aortic stenosis', 'Aortic regurgitation (early diastolic at LSE)'], radiation: 'Carotids' },
+    // Pulmonary: one space right, two spaces up
+    { id: 'pulmonary', x: 42 + SPACE,  y: 52 - 2*SPACE,  color: '#eab308', label: 'Pulmonary valve', locationInfo: ['2nd left intercostal space', 'Left sternal border', 'Intensifies with inspiration'], murmurs: ['Pulmonary stenosis'], radiation: 'Left shoulder' },
+    // Tricuspid: quarter space right, quarter space up
+    { id: 'tricuspid', x: 52 + QUARTER,   y: 58 - QUARTER,     color: '#60a5fa', label: 'Tricuspid valve', locationInfo: ['Lower left sternal border', '4th–5th intercostal space', 'Inspiration accentuates (Carvallo)'], murmurs: ['Tricuspid regurgitation'], radiation: 'Right sternum' },
+    // Mitral: 2.5 spaces left, two spaces up
+    { id: 'mitral',    x: 72 - (2.5*SPACE),  y: 66 - 2*SPACE,  color: '#34d399', label: 'Mitral valve (apex)', locationInfo: ['5th left intercostal space', 'Mid‑clavicular line (apex)', 'Bell for low‑pitched MS'], murmurs: ['Mitral regurgitation', 'Mitral stenosis'], radiation: 'Axilla' },
+  ]
+  const [openValve, setOpenValve] = useState<string|null>(null)
+  const [openMurmur, setOpenMurmur] = useState<string|null>(null)
+  const [pulseSite, setPulseSite] = useState<string|null>(null)
+
+  function ThoraxSVG({ children }: { children?: React.ReactNode }) {
+    const [photoOk, setPhotoOk] = useState(true)
+    return (
+      <div className="relative mx-auto w-full max-w-md aspect-[3/4]" onClick={()=>{ setOpenValve(null); setOpenMurmur(null) }}>
+        {/* Optional photo overlay if present at /images/thorax-overlay.png */}
+        {photoOk && (
+          <img
+            src="/images/thorax-overlay.png"
+            alt=""
+            className="absolute inset-0 w-full h-full object-contain opacity-80 pointer-events-none"
+            onError={()=> setPhotoOk(false)}
+          />
+        )}
+        {!photoOk && (
+          <svg viewBox="0 0 100 130" className="absolute inset-0 w-full h-full pointer-events-none">
+            <defs>
+              <radialGradient id="thoraxBg" cx="50%" cy="40%" r="70%">
+                <stop offset="0%" stopColor="rgba(59,130,246,0.10)" />
+                <stop offset="100%" stopColor="rgba(0,0,0,0)" />
+              </radialGradient>
+            </defs>
+            <path d="M50 5 C30 10,20 25,22 45 C24 70,20 85,25 110 C28 123,72 123,75 110 C80 85,76 70,78 45 C80 25,70 10,50 5 Z"
+                  fill="url(#thoraxBg)" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8"/>
+            {/* Sternum */}
+            <rect x="47.5" y="18" width="5" height="50" rx="2.5" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" strokeWidth="0.6" />
+            {/* ribs / intercostal spaces */}
+            {(() => {
+              const start = 22, end = 66, count = 8; // ICS 2–9
+              const ys = Array.from({length: count}, (_,i)=> start + (end-start) * (i/(count-1)));
+              return ys.map((y,i)=>(
+                <line key={i} x1="28" y1={y} x2="72" y2={y} stroke="rgba(255,255,255,0.10)" strokeWidth="0.8" />
+              ))
+            })()}
+          </svg>
+        )}
+        {/* Interactive overlay (absolute children positioned via percentages) */}
+        <div className="absolute inset-0">
+          {/* ICS labels only when fallback SVG is visible */}
+          {!photoOk && (() => {
+            const start = 22, end = 66, count = 8;
+            const ys = Array.from({length: count}, (_,i)=> ({ y: start + (end-start) * (i/(count-1)), n: i+2 }));
+            return (
+              <>
+                {ys.map(({y,n})=>(
+                  <div key={`l-${n}`} className="pointer-events-none absolute -translate-y-1/2 text-[10px] text-slate-300"
+                       style={{ top: `${y}%`, left: '16%' }}>{n}</div>
+                ))}
+                {ys.map(({y,n})=>(
+                  <div key={`r-${n}`} className="pointer-events-none absolute -translate-y-1/2 text-[10px] text-slate-300"
+                       style={{ top: `${y}%`, right: '16%' }}>{`ICS ${n}`}</div>
+                ))}
+              </>
+            )
+          })()}
+          {children}
+        </div>
+      </div>
+    )
+  }
+
+  function SiteButton({ s, kind, open }: { s: typeof sites[number], kind: 'valve'|'murmur', open: boolean }) {
+    const isActive = pulseSite===s.id
+    const click = (e: React.MouseEvent)=> {
+      e.stopPropagation()
+      if (kind==='valve') setOpenValve(prev => prev===s.id? null : s.id)
+      else setOpenMurmur(prev => prev===s.id? null : s.id)
+    }
+    return (
+      <button onClick={click} className="absolute -translate-x-1/2 -translate-y-1/2"
+        style={{ left: `${s.x}%`, top: `${s.y}%` }} aria-label={s.label}>
+        <span className="relative block w-5 h-5 rounded-full"
+          style={{ backgroundColor: s.color, boxShadow: `0 0 12px ${s.color}80` }}>
+          {/* baseline gentle colored ring */}
+          <span className="pointer-events-none absolute inset-0 rounded-full animate-ping" style={{ backgroundColor: `${s.color}22` }} />
+          {/* active state: emerald green rings */}
+          {isActive && (
+            <>
+              <span className="pointer-events-none absolute inset-0 rounded-full animate-ping" style={{ backgroundColor: `rgba(16,185,129,0.45)` }} />
+              <span className="pointer-events-none absolute inset-0 rounded-full animate-ping" style={{ backgroundColor: `rgba(16,185,129,0.25)`, animationDelay: '250ms' }} />
+            </>
+          )}
+        </span>
+        {open && (
+          <div className="pointer-events-auto absolute left-1/2 -translate-x-1/2 -top-2 translate-y-[-100%] z-10 w-64 rounded-lg border border-white/10 bg-slate-900/95 p-3 text-xs text-slate-200 shadow-lg">
+            <div className="flex items-center justify-between mb-1">
+              <div className="font-semibold text-emerald-300">{s.label}</div>
+              <button
+                onClick={(e)=>{ e.stopPropagation(); if (kind==='valve') setOpenValve(null); else setOpenMurmur(null) }}
+                className="px-1.5 py-0.5 rounded-md bg-white/10 hover:bg-white/20"
+                aria-label="Close">
+                ✕
+              </button>
+            </div>
+            {kind==='valve' ? (
+              <ul className="list-disc pl-5 space-y-1">
+                {(s as any).locationInfo?.map((m:string,i:number)=>(<li key={i}>{m}</li>))}
+              </ul>
+            ) : (
+              <>
+                <ul className="list-disc pl-5 space-y-1">
+                  {s.murmurs.map((m,i)=>(<li key={i}>{m}</li>))}
+                </ul>
+                <div className="mt-2 text-[11px] text-slate-400">Radiation: <span className="text-sky-300">{s.radiation}</span></div>
+              </>
+            )}
+            <div className="absolute left-1/2 -translate-x-1/2 -bottom-2 w-0 h-0 border-x-6 border-x-transparent border-t-8 border-t-slate-900/95" />
+          </div>
+        )}
+      </button>
+    )
+  }
+
+  // Popover removed in favor of anchored floating content on the markers
+
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 mx-auto max-w-6xl w-full px-6 py-8 grid grid-rows-[auto_1fr_auto] gap-6">
+        <Mentor text="Left: valve positions. Right: common murmurs and typical radiation. Tap a site to learn more; use the table to trigger glow on key sites." />
+        <div className="grid sm:grid-cols-2 gap-6">
+          {/* Left: Valve map */}
+          <div className="relative bg-white/5 border border-white/10 rounded-xl p-4 overflow-visible" onClick={()=> setOpenValve(null)}>
+            <div className="text-sm text-slate-300 mb-2">Valve Locations</div>
+            <ThoraxSVG>
+              {sites.map(s => <SiteButton key={s.id} s={s} kind="valve" open={openValve===s.id} />)}
+            </ThoraxSVG>
+          </div>
+          {/* Right: Murmur map with same sites – we reuse but openMurmur state */}
+          <div className="relative bg-white/5 border border-white/10 rounded-xl p-4 overflow-visible" onClick={()=> setOpenMurmur(null)}>
+            <div className="text-sm text-slate-300 mb-2">Murmurs & Radiation</div>
+            <ThoraxSVG>
+              {sites.map(s => <SiteButton key={s.id} s={s} kind="murmur" open={openMurmur===s.id} />)}
+            </ThoraxSVG>
+          </div>
+        </div>
+        {/* Reference table with glow controls */}
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 overflow-auto">
+          <table className="min-w-full text-sm">
+            <thead className="sticky top-0 bg-white/5 backdrop-blur text-slate-300">
+              <tr className="[&>th]:px-3 [&>th]:py-2 [&>th]:text-left border-b border-white/10">
+                <th className="text-left">Murmur</th>
+                <th>Cycle</th>
+                <th>Character</th>
+                <th>Breathing</th>
+                <th>Location</th>
+                <th>Radiation</th>
+                <th>View</th>
+              </tr>
+            </thead>
+            <tbody className="text-slate-200">
+              {/* Rows – align with murmurs above */}
+              <tr className="border-b border-white/5">
+                <td className="px-3 py-2">Aortic stenosis</td><td>Systolic</td><td>Ejection</td><td>Expiration</td><td>Aortic</td><td>Carotids</td>
+                <td className="px-2 py-2"><button onClick={()=> setPulseSite(pulseSite==='aortic'? null : 'aortic')} className="px-2 py-1 rounded-md" style={{ background: '#f59e0b22', border: '1px solid #f59e0b88', boxShadow: '0 0 12px #f59e0b55' }}>View</button></td>
+              </tr>
+              <tr className="border-b border-white/5">
+                <td className="px-3 py-2">Pulmonary stenosis</td><td>Systolic</td><td>Ejection</td><td>Inspiration ↑</td><td>Pulmonary</td><td>Left shoulder</td>
+                <td className="px-2 py-2"><button onClick={()=> setPulseSite(pulseSite==='pulmonary'? null : 'pulmonary')} className="px-2 py-1 rounded-md" style={{ background: '#eab30822', border: '1px solid #eab30888', boxShadow: '0 0 12px #eab30855' }}>View</button></td>
+              </tr>
+              <tr className="border-b border-white/5">
+                <td className="px-3 py-2">Mitral regurgitation</td><td>Systolic</td><td>Pansystolic</td><td>Expiration</td><td>Mitral</td><td>Axilla</td>
+                <td className="px-2 py-2"><button onClick={()=> setPulseSite(pulseSite==='mitral'? null : 'mitral')} className="px-2 py-1 rounded-md" style={{ background: '#34d39922', border: '1px solid #34d39988', boxShadow: '0 0 12px #34d39955' }}>View</button></td>
+              </tr>
+              <tr className="border-b border-white/5">
+                <td className="px-3 py-2">Tricuspid regurgitation</td><td>Systolic</td><td>Pansystolic</td><td>Inspiration ↑</td><td>Tricuspid</td><td>Right sternum</td>
+                <td className="px-2 py-2"><button onClick={()=> setPulseSite(pulseSite==='tricuspid'? null : 'tricuspid')} className="px-2 py-1 rounded-md" style={{ background: '#60a5fa22', border: '1px solid #60a5fa88', boxShadow: '0 0 12px #60a5fa55' }}>View</button></td>
+              </tr>
+              <tr className="border-b border-white/5">
+                <td className="px-3 py-2">Mitral stenosis</td><td>Mid/late diastolic</td><td>Rumble</td><td>Expiration</td><td>Mitral</td><td>—</td>
+                <td className="px-2 py-2"><button onClick={()=> setPulseSite(pulseSite==='mitral'? null : 'mitral')} className="px-2 py-1 rounded-md" style={{ background: '#34d39922', border: '1px solid #34d39988', boxShadow: '0 0 12px #34d39955' }}>View</button></td>
+              </tr>
+              <tr>
+                <td className="px-3 py-2">Aortic regurgitation</td><td>Early diastolic</td><td>Decrescendo</td><td>Expiration</td><td>LSE</td><td>LSE</td>
+                <td className="px-2 py-2"><button onClick={()=> setPulseSite(pulseSite==='aortic'? null : 'aortic')} className="px-2 py-1 rounded-md" style={{ background: '#38bdf822', border: '1px solid #38bdf888', boxShadow: '0 0 12px #38bdf855' }}>View</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function AudioQuiz({ onPlay, onStop, stethoscopeOn }: { onPlay: (src: string | string[])=>void, onStop: ()=>void, stethoscopeOn: boolean }) {
+  const items = [
+    { id: 'as',  phrase: 'Radiates to the carotids',           audio: ['/assets/audio/adultCASE4.mp3'], answer: 'aortic stenosis' },
+    { id: 'pda', phrase: 'Machine-like continuous',             audio: ['/assets/audio/adultCASE7.mp3','/assets/audio/3-PDA.mp3'], answer: 'patent ductus arteriosus' },
+    { id: 'mr',  phrase: 'Axillary radiation',                  audio: ['/assets/audio/adultCASE6.mp3'], answer: 'mitral regurgitation' },
+    { id: 'ms',  phrase: 'Opening snap + mid-diastolic rumble', audio: ['/assets/audio/adultCASE3.mp3'], answer: 'mitral stenosis' },
+    { id: 'ar',  phrase: 'Early diastolic decrescendo at LSE',  audio: ['/assets/audio/Ar.mp3','/assets/audio/ar.mp3','/assets/audio/adultCASE4.mp3'], answer: 'aortic regurgitation' },
+    { id: 'inn', phrase: 'Musical, vibratory quality',          audio: ['/assets/audio/8-Innocent-murmur-and-S3.mp3'], answer: 'innocent murmur' },
+    { id: 'vsd', phrase: 'Harsh holosystolic at LLSB',          audio: ['/assets/audio/adultCASE5.mp3'], answer: 'ventricular septal defect' },
+    { id: 'tr',  phrase: 'Increases with inspiration',          audio: ['/assets/audio/tr.mp3'], answer: 'tricuspid regurgitation' },
+    { id: 'hocm',phrase: 'Louder with Valsalva/standing',       audio: ['/assets/audio/HOCM.mp3'], answer: 'hypertrophic obstructive cardiomyopathy' },
+  ]
+  const [idx, setIdx] = useState(0)
+  const [value, setValue] = useState('')
+  const [result, setResult] = useState<'idle'|'correct'|'wrong'>('idle')
+  const current = items[idx]
+  function check() {
+    const norm = (s:string)=> s.toLowerCase().replace(/[^a-z]/g,'')
+    const ok = norm(value).includes(norm(current.answer))
+    setResult(ok? 'correct':'wrong')
+  }
+  function next() {
+    onStop(); setValue(''); setResult('idle'); setIdx(i=> Math.min(i+1, items.length-1))
+  }
+  function prev() {
+    onStop(); setValue(''); setResult('idle'); setIdx(i=> Math.max(i-1, 0))
+  }
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 mx-auto max-w-xl w-full px-6 py-8 grid grid-rows-[auto_1fr_auto] gap-6">
+        <Mentor text="Final audio recognition: associate common buzz-phrases with their hallmark sounds." />
+        <div className="flex flex-col items-center gap-4">
+          <button disabled={!stethoscopeOn} onClick={()=> onPlay(current.audio)} className="relative w-20 h-20 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 shadow-[0_0_20px_rgba(16,185,129,0.35)] hover:bg-emerald-500/30 disabled:opacity-40">
+            🔊
+          </button>
+          {!stethoscopeOn && (
+            <div className="text-xs text-amber-300" role="status" aria-live="polite">
+              Equip the stethoscope to play audio.
+            </div>
+          )}
+          <div className="px-3 py-1 rounded-md border border-cyan-400/40 bg-cyan-500/10 text-cyan-200 text-sm">{current.phrase}</div>
+          <input value={value} onChange={e=>setValue(e.target.value)} placeholder="Type the diagnosis..." className="w-full px-3 py-2 rounded-md bg-white/5 border border-white/10 outline-none" />
+          <div className="flex gap-2">
+            <button onClick={prev} disabled={idx===0} className="px-3 py-2 rounded-md bg-white/10 disabled:opacity-40">Back</button>
+            <button onClick={check} className="px-3 py-2 rounded-md bg-emerald-500/90 text-slate-900 font-semibold hover:bg-emerald-400">Check</button>
+            <button onClick={next} disabled={idx===items.length-1} className="px-3 py-2 rounded-md bg-white/10 disabled:opacity-40">Next</button>
+          </div>
+          {result!=='idle' && (
+            <div className={`text-sm ${result==='correct'?'text-emerald-300':'text-amber-300'}`}>
+              {result==='correct' ? 'Correct!' : `Answer: ${current.answer}`}
+            </div>
+          )}
+        </div>
+        <div className="text-xs text-slate-400 text-center">
+          Objective: reinforce memory by pairing hallmark buzz-phrases with their characteristic sounds.
+        </div>
+        {/* Neon outline icons */}
+        <div className="mt-6 flex items-center justify-center gap-8 opacity-90">
+          <TbBrain size={42} className="text-cyan-300 drop-shadow-[0_0_12px_rgba(34,211,238,0.55)]" />
+          <TbTopologyStar3 size={42} className="text-cyan-300 drop-shadow-[0_0_12px_rgba(34,211,238,0.55)]" />
+          <TbEar size={42} className="text-cyan-300 drop-shadow-[0_0_12px_rgba(34,211,238,0.55)]" />
+        </div>
+      </div>
+    </div>
+  )
+}
 function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, onStop }: { onNext: () => void, onPrev: () => void, setAccuracy: Dispatch<SetStateAction<number>>, accuracy: number, stethoscopeOn: boolean, onPlay: (src: string | string[])=>void, onStop: () => void }) {
   const deck = adultCases
   const [idx, setIdx] = useState(0)
   const [selected, setSelected] = useState<number|null>(null)
   const [isCorrect, setIsCorrect] = useState<boolean|null>(null)
+  const [attempts, setAttempts] = useState(0)
   const current = deck[idx]
-  const [highlightOn, setHighlightOn] = useState(false)
-  const deskVignetteRef = useRef<HTMLParagraphElement|null>(null)
-  const mobileVignetteRef = useRef<HTMLParagraphElement|null>(null)
-  const mobileTokens = useMemo(() => (current.vignette.match(/\s+|[^\s]+/g) || [current.vignette]), [current.vignette])
+  const [highlightOn, setHighlightOn] = useState(true)
+  const [eliminated, setEliminated] = useState<Set<number>>(new Set())
+  const caseContainerRef = useRef<HTMLDivElement|null>(null)
+  const vignetteRef = useRef<HTMLParagraphElement|null>(null)
+
+  // Reset highlight state and remove previous marks when case changes
+  useEffect(() => {
+    setEliminated(new Set())
+    const container = vignetteRef.current
+    if (!container) return
+    Array.from(container.querySelectorAll<HTMLElement>('.neon-highlight')).forEach(el => el.classList.remove('neon-highlight'))
+  }, [current.id])
+
+  // (Removed global selectionchange to avoid cross-case interference)
 
   // Generate shuffled options for current case
   const shuffledOptions = useMemo(() => {
@@ -860,63 +1417,79 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
   }, [idx, current.options, current.correctIndex])
 
   function choose(i: number) {
-    if (selected!==null) return
+    // If already solved correctly, ignore further clicks
+    if (isCorrect === true) return
     const correct = i===shuffledOptions.newCorrectIndex
     setSelected(i)
     setIsCorrect(correct)
+    if (attempts === 0) {
     setAccuracy(a=> Math.max(0, Math.min(100, a + (correct? +3 : -6))))
+    }
+    setAttempts(a => a + 1)
   }
 
-  function handleMouseUpHighlight() {
-    if (!highlightOn) return
-    const container = deskVignetteRef.current
-    if (!container) return
-    const selection = window.getSelection()
-    if (!selection || selection.isCollapsed || selection.rangeCount === 0) return
-    const range = selection.getRangeAt(0)
-    if (!container.contains(range.commonAncestorContainer)) return
-    try {
-      const span = document.createElement('span')
-      span.className = 'neon-highlight'
-      span.setAttribute('data-hl', '1')
-      try {
-        range.surroundContents(span)
-      } catch {
-        const contents = range.extractContents()
-        span.appendChild(contents)
-        range.insertNode(span)
-      }
-    } finally {
-      selection.removeAllRanges()
-    }
-  }
-  function clearHighlights() {
-    const clearIn = (container: HTMLElement|null) => {
+  function handleSelectionHighlight() {
+    setTimeout(() => {
+      if (!highlightOn) return
+      const container = vignetteRef.current
       if (!container) return
-      const marks = Array.from(container.querySelectorAll<HTMLElement>('.neon-highlight'))
-      marks.forEach((el) => {
-        if (el.dataset.hl === '1') {
-          const parent = el.parentNode as HTMLElement | null
-          while (el.firstChild) parent?.insertBefore(el.firstChild, el)
-          parent?.removeChild(el)
-        } else {
-          el.classList.remove('neon-highlight')
+      const sel = window.getSelection()
+      if (!sel || sel.isCollapsed || sel.rangeCount === 0) return
+      const range = sel.getRangeAt(0)
+      if (!container.contains(range.commonAncestorContainer)) return
+      try {
+        const span = document.createElement('span')
+        span.className = 'neon-highlight'
+        span.setAttribute('data-hl', '1')
+        try {
+          range.surroundContents(span)
+        } catch {
+          const contents = range.extractContents()
+          span.appendChild(contents)
+          range.insertNode(span)
         }
-      })
-    }
-    clearIn(deskVignetteRef.current)
-    clearIn(mobileVignetteRef.current)
+      } finally {
+        sel.removeAllRanges()
+      }
+    }, 0)
+  }
+
+  // selection-based highlighting removed in favor of consistent token-based taps
+  function clearHighlights() {
+    const container = vignetteRef.current
+    if (!container) return
+    Array.from(container.querySelectorAll<HTMLElement>('.neon-highlight')).forEach(el => {
+      if ((el as HTMLElement).dataset.hl === '1') {
+        const parent = el.parentNode as HTMLElement | null
+        while (el.firstChild) parent?.insertBefore(el.firstChild, el)
+        parent?.removeChild(el)
+      } else {
+        el.classList.remove('neon-highlight')
+      }
+    })
   }
 
   const isLast = idx >= deck.length - 1
   const isFirst = idx <= 0
+
+  // Ensure highlighter is freshly armed after navigation
+  function rearmHighlighter() {
+    // Clear any browser selection and re-toggle listeners
+    try { window.getSelection()?.removeAllRanges() } catch {}
+    setHighlightOn(false)
+    // Re-enable on next tick to retrigger the effect
+    setTimeout(() => setHighlightOn(true), 0)
+  }
 
   function nextCase() {
     onStop()
     if (isLast) { onNext(); return }
     setSelected(null)
     setIsCorrect(null)
+    setAttempts(0)
+    // Advance first, then re-arm after animation completes
     setIdx(i => Math.min(i+1, deck.length-1))
+    setTimeout(rearmHighlighter, 550) // matches transition duration (0.5s) with small buffer
   }
 
   function prevCase() {
@@ -924,34 +1497,28 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
     if (isFirst) return
     setSelected(null)
     setIsCorrect(null)
+    setAttempts(0)
     setIdx(i => Math.max(0, i-1))
+    setTimeout(rearmHighlighter, 550)
   }
 
   return (
     <div className="h-full flex flex-col">
+      <HeadphoneNotice />
       <div className="flex-1 mx-auto max-w-4xl w-full px-6 py-8 grid grid-rows-[auto_1fr_auto] gap-6">
-        <Mentor text="We’ll move bed-to-bed. Read the case file, listen, and decide." />
+        <Mentor text="We'll move bed-to-bed. Read the case file, listen, and decide." />
         <AnimatePresence mode="popLayout" initial={false}>
-          <motion.div key={current.id} initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.5 }} className="relative rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
+          <motion.div ref={caseContainerRef} key={current.id} initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.5 }} className="relative rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
             <div className="text-sm text-slate-300 mb-1">{current.title}</div>
             <div className="text-xs text-slate-400 mb-3">Patient: {current.patientName} · {current.age}y · {current.sex}</div>
-            {/* Vignette: desktop selection-based + mobile token-tap highlighting */}
-            <p ref={deskVignetteRef} onMouseUp={handleMouseUpHighlight} className="mb-4 select-text hidden sm:block">{current.vignette}</p>
-            <p ref={mobileVignetteRef} className="mb-4 sm:hidden leading-relaxed">
-              {mobileTokens.map((tok: string, i: number) => (
-                <span
-                  key={i}
-                  className={tok.trim().length ? 'cursor-pointer' : ''}
-                  onClick={()=>{
-                    if (!highlightOn) return
-                    if (!tok.trim().length) return
-                    const el = (mobileVignetteRef.current?.children[i] as HTMLElement | undefined)
-                    el?.classList.toggle('neon-highlight')
-                  }}
-                >
-                  {tok}
-                </span>
-              ))}
+            {/* Vignette: selection-based highlighting; drag to highlight; tap also supported */}
+            <p
+              ref={vignetteRef}
+              onMouseUp={handleSelectionHighlight}
+              onTouchEnd={handleSelectionHighlight}
+              className="mb-4 select-text leading-relaxed"
+            >
+              {current.vignette}
             </p>
             {/* Highlight controls - horizontal row, eraser left of pen */}
             <div className="absolute top-3 right-1 z-10 flex flex-row gap-1.5">
@@ -976,15 +1543,32 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {shuffledOptions.shuffled.map((d, i) => (
-                <motion.button key={d}
+                <div key={d} className="flex items-stretch gap-2">
+                  <motion.button
                   whileTap={{ scale: 0.97 }}
                   animate={selected===i ? (isCorrect? { scale: 1.03, backgroundColor: 'rgba(16,185,129,0.25)'} : { x: [0,-6,6,-4,4,0], backgroundColor: 'rgba(239,68,68,0.25)'}) : {}}
-                  onClick={() => choose(i)}
-                  className="px-3 py-2 rounded-md bg-white/10 hover:bg-white/20 flex items-center gap-2">
+                    onClick={() => { if (!eliminated.has(i)) choose(i) }}
+                    className={`px-3 py-2 rounded-md bg-white/10 hover:bg-white/20 flex items-center gap-2 flex-1 ${eliminated.has(i)? 'line-through opacity-50 pointer-events-none' : ''}`}
+                  >
                   {selected===i && isCorrect===true && <FiCheckCircle className="text-emerald-400"/>}
                   {selected===i && isCorrect===false && <FiXCircle className="text-rose-400"/>}
                   {d}
                 </motion.button>
+                  <button
+                    aria-label={eliminated.has(i)? 'Restore option':'Eliminate option'}
+                    onClick={()=>{
+                      setEliminated(prev => {
+                        const next = new Set(prev)
+                        if (next.has(i)) next.delete(i); else next.add(i)
+                        return next
+                      })
+                    }}
+                    className={`px-2 py-2 rounded-md border ${eliminated.has(i)? 'border-emerald-400/40 text-emerald-300 bg-emerald-500/10' : 'border-white/10 text-slate-300 hover:bg-white/10'}`}
+                    title="Cross out"
+                  >
+                    ✕
+                  </button>
+                </div>
               ))}
             </div>
           {selected!==null && (
@@ -1008,6 +1592,7 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
           </div>
           <button onClick={nextCase} className="px-3 py-2 sm:px-4 sm:py-2 rounded-md bg-emerald-500/90 text-slate-900 font-semibold hover:bg-emerald-400 text-sm">{isLast ? 'Finish Round' : 'Next Patient'}</button>
         </div>
+        <CaseClipboard caseData={current} />
       </div>
     </div>
   )
@@ -1016,67 +1601,74 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
 function Library({ onPrev: _onPrev }: { onPrev: () => void }) {
   const resources = [
     {
-      title: "British Society of Echocardiography Guidelines",
-      description: "Comprehensive guidelines for cardiac assessment and echocardiography in the UK.",
-      url: "https://www.bsecho.org/",
+      title: "BSE Guidelines",
+      description: "British Society of Echocardiography (BSE) Guidelines.",
+      url: "https://www.bsecho.org/Public/Public/Education/Guidelines.aspx",
       category: "Clinical Guidelines",
       icon: "📋"
     },
     {
-      title: "NICE Clinical Knowledge Summaries - Heart Murmurs",
-      description: "Evidence-based guidance on assessment and management of heart murmurs in primary care.",
-      url: "https://cks.nice.org.uk/topics/heart-murmurs/",
+      title: "NICE NG208 – Heart valve disease",
+      description: "Guidance on murmurs/referral in adults with valve disease.",
+      url: "https://www.nice.org.uk/guidance/ng208/chapter/recommendations",
       category: "Clinical Guidelines",
       icon: "🏥"
     },
     {
-      title: "University of Washington Heart Sounds",
-      description: "Interactive heart sounds library with high-quality audio recordings and clinical correlations.",
-      url: "https://depts.washington.edu/physdx/heart/demo.html",
-      category: "Audio Resources",
-      icon: "🔊"
-    },
-    {
-      title: "British Heart Foundation - Heart Conditions",
-      description: "Patient-friendly explanations of cardiac conditions with medical professional resources.",
-      url: "https://www.bhf.org.uk/informationsupport/conditions",
-      category: "Educational",
+      title: "BHF – Heart Murmurs",
+      description: "British Heart Foundation information page on murmurs.",
+      url: "https://www.bhf.org.uk/informationsupport/conditions/heart-murmurs",
+      category: "Educational (Patient/Professional)",
       icon: "❤️"
     },
     {
-      title: "CardioNet - ECG Learning",
-      description: "Comprehensive ECG interpretation resources with case studies and interactive modules.",
-      url: "https://www.ecglibrary.com/",
-      category: "ECG Resources",
-      icon: "📈"
+      title: "Geeky Medics – Heart Murmurs",
+      description: "Medical‑school style article explaining murmurs.",
+      url: "https://geekymedics.com/heart-murmurs/",
+      category: "Educational / Medical-School Style",
+      icon: "🩺"
     },
     {
-      title: "Medscape Cardiology",
-      description: "Latest cardiology news, clinical updates, and educational content for medical professionals.",
-      url: "https://www.medscape.com/cardiology",
-      category: "Clinical Updates",
-      icon: "📰"
+      title: "Geeky Medics – Innocent/Flow Murmurs",
+      description: "Overview of innocent/flow murmurs with exam tips.",
+      url: "https://geekymedics.com/innocent-murmurs/",
+      category: "Educational / Medical-School Style",
+      icon: "🩺"
     },
     {
-      title: "European Society of Cardiology Guidelines",
-      description: "International guidelines for cardiovascular disease prevention and management.",
-      url: "https://www.escardio.org/Guidelines",
-      category: "Clinical Guidelines",
-      icon: "🌍"
-    },
-    {
-      title: "Teaching Heart Auscultation",
-      description: "Dedicated platform for learning cardiac auscultation with audio files and clinical cases.",
-      url: "https://teachingheartauscultation.com/",
-      category: "Audio Resources",
+      title: "Teaching Heart Auscultation – Free MP3s",
+      description: "Heart sounds & murmurs audio library (free MP3).",
+      url: "https://teachingheartauscultation.com/heart-sounds-mp3-downloads",
+      category: "Audio / Auscultation Resource",
       icon: "🎧"
     },
     {
-      title: "BMJ Learning - Cardiology",
-      description: "Evidence-based learning modules on cardiovascular medicine and examination techniques.",
-      url: "https://learning.bmj.com/",
-      category: "Educational",
-      icon: "📚"
+      title: "Easy Auscultation – Heart Sounds",
+      description: "Audio lessons and quizzes for heart sounds & murmurs.",
+      url: "https://www.easyauscultation.com/heart-sounds",
+      category: "Audio / Auscultation Resource",
+      icon: "🎧"
+    },
+    {
+      title: "Practical Clinical Skills – Heart Sounds",
+      description: "Free lessons & recordings for heart sounds and murmurs.",
+      url: "https://www.practicalclinicalskills.com/heart-sounds",
+      category: "Audio / Auscultation Resource",
+      icon: "🎧"
+    },
+    {
+      title: "Zero to Finals – Valvular Heart Disease",
+      description: "Concise revision notes on valvular disease and murmurs.",
+      url: "https://zerotofinals.com/medicine/cardiology/valvularheartdisease/",
+      category: "Medical-School Style / Revision",
+      icon: "📘"
+    },
+    {
+      title: "MSD Manuals – Cardiac Auscultation",
+      description: "Professional textbook‑style overview of auscultation.",
+      url: "https://www.msdmanuals.com/professional/cardiovascular-disorders/approach-to-the-cardiac-patient/cardiac-auscultation",
+      category: "Medical School Style / Textbook Format",
+      icon: "📗"
     }
   ]
 
@@ -1141,10 +1733,10 @@ function Mentor({ text }: { text: string }) {
     <div className="flex items-start gap-3">
       <div className="w-12 h-12 rounded-full overflow-hidden bg-white/10 border border-emerald-400/30 shadow-[0_0_12px_rgba(16,185,129,0.35)]">
         <img
-          src="https://upload.wikimedia.org/wikipedia/commons/1/16/William_Osler.jpg"
+          src="/images/drhouse.jpg"
           alt="Dr. Lubb von Dub"
-          className="w-full h-full object-cover"
-          onError={(e)=>{ (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=256&auto=format&fit=crop' }}
+          className="w-full h-full object-cover object-center"
+          onError={(e)=>{ (e.currentTarget as HTMLImageElement).src = '/images/drhouse.jpg' }}
         />
       </div>
       <motion.div initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
