@@ -882,43 +882,43 @@ export function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethosco
     setIsCorrect(null)
     setIdx(i => Math.max(0, i-1))
   }
-  function handleSelectionHighlight() {
-    setTimeout(() => {
-      if (!highlightOn) return
-      const container = vignetteRef.current
-      if (!container) return
-      const sel = window.getSelection()
-      if (!sel || sel.isCollapsed || sel.rangeCount === 0) return
-      const range = sel.getRangeAt(0)
-      if (!container.contains(range.commonAncestorContainer)) return
-      try {
-        const span = document.createElement('span')
-        span.className = 'neon-highlight'
-        span.setAttribute('data-hl', '1')
-        try {
-          range.surroundContents(span)
-        } catch {
-          const contents = range.extractContents()
-          span.appendChild(contents)
-          range.insertNode(span)
-        }
-      } finally {
-        sel.removeAllRanges()
-      }
-    }, 0)
-  }
+  // legacy selection handler removed (handled by CaseHighlighter)
   function clearHighlights() {
-    const container = vignetteRef.current
-    if (!container) return
-    Array.from(container.querySelectorAll<HTMLElement>('.neon-highlight')).forEach(el => {
-      if ((el as HTMLElement).dataset.hl === '1') {
-        const parent = el.parentNode as HTMLElement | null
-        while (el.firstChild) parent?.insertBefore(el.firstChild, el)
-        parent?.removeChild(el)
-      } else {
-        el.classList.remove('neon-highlight')
+    const scope = vignetteRef.current
+    if (!scope) return
+    try { window.getSelection()?.removeAllRanges() } catch {}
+    // Keep unwrapping until no highlight nodes remain
+    // This handles any accidental nested highlights from multiple handlers
+    let removed = true
+    while (removed) {
+      removed = false
+      const spans1 = scope.querySelectorAll<HTMLSpanElement>('span[data-hl=\"1\"]')
+      if (spans1.length) {
+        spans1.forEach(span => {
+          const parent = span.parentNode as HTMLElement | null
+          while (span.firstChild) parent?.insertBefore(span.firstChild, span)
+          parent?.removeChild(span)
+        })
+        removed = true
+        continue
       }
-    })
+      const spans2 = scope.querySelectorAll<HTMLSpanElement>('span.neon-highlight')
+      if (spans2.length) {
+        spans2.forEach(span => {
+          const parent = span.parentNode as HTMLElement | null
+          while (span.firstChild) parent?.insertBefore(span.firstChild, span)
+          parent?.removeChild(span)
+        })
+        removed = true
+        continue
+      }
+      const others = scope.querySelectorAll<HTMLElement>('.neon-highlight')
+      if (others.length) {
+        others.forEach(el => el.classList.remove('neon-highlight'))
+        removed = true
+        continue
+      }
+    }
   }
 
   return (
@@ -926,15 +926,13 @@ export function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethosco
       <div className="flex-1 mx-auto max-w-4xl w-full px-6 py-8 grid grid-rows-[auto_1fr_auto] gap-6">
         <Mentor text="Welcome to the Peds Ward. Smaller patients, equally big learning." />
         <AnimatePresence mode="popLayout" initial={false}>
-          <motion.div ref={caseContainerRef} key={current.id} initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.5 }} className="relative rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
+          <motion.div ref={caseContainerRef} key={current.id} data-case="1" data-caseid={current.id} initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.5 }} className="relative rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
             <div className="text-sm text-slate-300 mb-1">{current.title}</div>
             <div className="text-xs text-slate-400 mb-3">Patient: {current.patientName} · {current.age}y · {current.sex}</div>
             {/* Vignette: selection-based highlighting; drag to highlight; tap also supported */}
             <p
               ref={vignetteRef}
               key={current.id}
-              onMouseUp={handleSelectionHighlight}
-              onTouchEnd={handleSelectionHighlight}
               className="mb-4 select-text leading-relaxed"
             >
               {current.vignette}
@@ -942,7 +940,7 @@ export function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethosco
             {/* Highlight controls - horizontal row, eraser left of pen */}
             <div className="absolute top-3 right-1 z-10 flex flex-row gap-1.5">
               <button
-                onClick={clearHighlights}
+                onClick={(e)=> clearHighlights(e.currentTarget as HTMLElement)}
                 className="px-1.5 py-1.5 rounded-md border border-white/10 bg-white/0 hover:bg-white/5 text-slate-200"
                 title="Clear highlights"
               >
@@ -1400,33 +1398,51 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
   const [eliminated, setEliminated] = useState<Set<number>>(new Set())
   const caseContainerRef = useRef<HTMLDivElement|null>(null)
   const vignetteRef = useRef<HTMLParagraphElement|null>(null)
+  const [vignetteNonce, setVignetteNonce] = useState(0)
+  const hlRef = useRef<CaseHighlighter|null>(null)
 
-  // Reset highlight state and remove previous marks when case changes
-  useEffect(() => {
-    setEliminated(new Set())
-    const container = vignetteRef.current
-    if (!container) return
-    Array.from(container.querySelectorAll<HTMLElement>('.neon-highlight')).forEach(el => el.classList.remove('neon-highlight'))
-  }, [current.id])
-
-  // Attach end-of-selection listeners to the active case container only
-  useEffect(() => {
-    if (!highlightOn) return
+  // Helper to always resolve the vignette element within the CURRENT case container
+  function getVignetteEl(): HTMLParagraphElement | null {
     const container = caseContainerRef.current
-    const scope = vignetteRef.current
-    if (!container || !scope) return
-    const onEnd = () => {
-      // allow browsers to finalize the selection range
+    if (!container) return null
+    return (container.querySelector('p[data-vignette=\"1\"]') as HTMLParagraphElement | null) 
+      ?? (container.querySelector('p') as HTMLParagraphElement | null)
+  }
+
+  class CaseHighlighter {
+    private root: HTMLParagraphElement
+    private enabled = true
+    private onEndBound = (ev: Event) => this.onEnd(ev)
+    constructor(root: HTMLParagraphElement) {
+      this.root = root
+      root.addEventListener('pointerup', this.onEndBound, { passive: true } as any)
+      root.addEventListener('touchend', this.onEndBound, { passive: true } as any)
+    }
+    enable() { this.enabled = true }
+    disable() { this.enabled = false }
+    clear() {
+      // unwrap created highlight spans and remove residual class styling
+      const spans = this.root.querySelectorAll<HTMLSpanElement>('span[data-hl=\"1\"], span.neon-highlight')
+      spans.forEach(span => {
+        const parent = span.parentNode as HTMLElement | null
+        while (span.firstChild) parent?.insertBefore(span.firstChild, span)
+        parent?.removeChild(span)
+      })
+      this.root.querySelectorAll<HTMLElement>('.neon-highlight').forEach(el => el.classList.remove('neon-highlight'))
+      try { window.getSelection()?.removeAllRanges() } catch {}
+    }
+    dispose() {
+      this.disable()
+      this.root.removeEventListener('pointerup', this.onEndBound as any)
+      this.root.removeEventListener('touchend', this.onEndBound as any)
+    }
+    private onEnd(_ev: Event) {
+      if (!this.enabled) return
       window.setTimeout(() => {
         const sel = window.getSelection()
         if (!sel || sel.isCollapsed || sel.rangeCount === 0) return
         const range = sel.getRangeAt(0)
-        // Restrict strictly to scenario paragraph
-        const withinScenario =
-          scope.contains(range.commonAncestorContainer) &&
-          scope.contains(range.startContainer) &&
-          scope.contains(range.endContainer)
-        if (!withinScenario) return
+        if (!this.root.contains(range.commonAncestorContainer)) return
         try {
           const span = document.createElement('span')
           span.className = 'neon-highlight'
@@ -1441,15 +1457,33 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
         } finally {
           try { sel.removeAllRanges() } catch {}
         }
-      }, 50)
+      }, 30)
     }
-    container.addEventListener('pointerup', onEnd, { passive: true })
-    container.addEventListener('touchend', onEnd, { passive: true })
+  }
+
+  // Reset highlight state and remove previous marks when case changes
+  useEffect(() => {
+    setEliminated(new Set())
+    const scope = getVignetteEl()
+    if (scope) scope.replaceChildren(document.createTextNode(current.vignette))
+    setVignetteNonce(0)
+    // (re)create highlighter instance for this case
+    const root = vignetteRef.current
+    if (hlRef.current) { try { hlRef.current.dispose() } catch {} hlRef.current = null }
+    if (root) {
+      hlRef.current = new CaseHighlighter(root)
+      if (!highlightOn) hlRef.current.disable()
+    }
     return () => {
-      container.removeEventListener('pointerup', onEnd)
-      container.removeEventListener('touchend', onEnd)
+      if (hlRef.current) { try { hlRef.current.dispose() } catch {} hlRef.current = null }
     }
-  }, [highlightOn, current.id])
+  }, [current.id])
+
+  // Reflect enable/disable state to the current highlighter instance
+  useEffect(() => {
+    if (!hlRef.current) return
+    if (highlightOn) hlRef.current.enable(); else hlRef.current.disable()
+  }, [highlightOn])
 
   // Generate shuffled options for current case
   const shuffledOptions = useMemo(() => {
@@ -1494,51 +1528,35 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
     }, 0)
   }
 
-  // selection-based highlighting removed in favor of consistent token-based taps
   function clearHighlights() {
-    const scope = vignetteRef.current
-    if (!scope) return
-    // Unwrap any span we created or fallback elements that still carry the class
-    const nodes = scope.querySelectorAll<HTMLElement>('[data-hl=\"1\"], .neon-highlight')
-    nodes.forEach(el => {
-      const parent = el.parentNode as HTMLElement | null
-      // unwrap contents
-      while (el.firstChild) parent?.insertBefore(el.firstChild, el)
-      parent?.removeChild(el)
-    })
+    hlRef.current?.clear()
   }
 
   const isLast = idx >= deck.length - 1
   const isFirst = idx <= 0
 
-  // Ensure highlighter is freshly armed after navigation
-  function rearmHighlighter() {
-    // Clear any browser selection and re-toggle listeners
-    try { window.getSelection()?.removeAllRanges() } catch {}
-    setHighlightOn(false)
-    // Re-enable on next tick to retrigger the effect
-    setTimeout(() => setHighlightOn(true), 0)
-  }
+  // rearmHighlighter removed (handled by CaseHighlighter lifecycle)
 
   function nextCase() {
     onStop()
     if (isLast) { onNext(); return }
+    hlRef.current?.dispose()
+    hlRef.current = null
     setSelected(null)
     setIsCorrect(null)
     setAttempts(0)
-    // Advance first, then re-arm after animation completes
     setIdx(i => Math.min(i+1, deck.length-1))
-    setTimeout(rearmHighlighter, 550) // matches transition duration (0.5s) with small buffer
   }
 
   function prevCase() {
     onStop()
     if (isFirst) return
+    hlRef.current?.dispose()
+    hlRef.current = null
     setSelected(null)
     setIsCorrect(null)
     setAttempts(0)
     setIdx(i => Math.max(0, i-1))
-    setTimeout(rearmHighlighter, 550)
   }
 
   return (
@@ -1547,30 +1565,44 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
       <div className="flex-1 mx-auto max-w-4xl w-full px-6 py-8 grid grid-rows-[auto_1fr_auto] gap-6">
         <Mentor text="We'll move bed-to-bed. Read the case file, listen, and decide." />
         <AnimatePresence mode="popLayout" initial={false}>
-          <motion.div ref={caseContainerRef} key={current.id} initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.5 }} className="relative rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
+          <motion.div ref={caseContainerRef} key={current.id} data-case="1" data-caseid={current.id} initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.5 }} className="relative rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
             <div className="text-sm text-slate-300 mb-1">{current.title}</div>
             <div className="text-xs text-slate-400 mb-3">Patient: {current.patientName} · {current.age}y · {current.sex}</div>
             {/* Vignette: selection-based highlighting; drag to highlight; tap also supported */}
             <p
               ref={vignetteRef}
-              key={current.id}
-              onMouseUp={handleSelectionHighlight}
-              onTouchEnd={handleSelectionHighlight}
+              key={`${current.id}-${vignetteNonce}`}
+              data-vignette="1"
               className="mb-4 select-text leading-relaxed"
             >
               {current.vignette}
             </p>
             {/* Highlight controls - horizontal row, eraser left of pen */}
-            <div className="absolute top-3 right-1 z-10 flex flex-row gap-1.5">
+            <div className="absolute top-3 right-1 z-10 flex flex-row gap-1.5 hl-controls">
               <button
-                onClick={clearHighlights}
+                onPointerUp={(e)=> e.stopPropagation()}
+                onTouchEnd={(e)=> { e.stopPropagation() }}
+                onMouseUp={(e)=> e.stopPropagation()}
+                onClick={(e)=> clearHighlights(e.currentTarget as HTMLElement)}
                 className="px-1.5 py-1.5 rounded-md border border-white/10 bg-white/0 hover:bg-white/5 text-slate-200"
                 title="Clear highlights"
               >
                 <LuEraser size={16} />
               </button>
               <button
-                onClick={()=> setHighlightOn(v=>!v)}
+                onPointerUp={(e)=> e.stopPropagation()}
+                onTouchEnd={(e)=> { e.stopPropagation() }}
+                onMouseUp={(e)=> e.stopPropagation()}
+                onClick={(e)=> {
+                  setHighlightOn(v=>{
+                    const next = !v
+                    if (!next) {
+                      // when pen is turned off, clear highlights for this card
+                      clearHighlights(e.currentTarget as HTMLElement)
+                    }
+                    return next
+                  })
+                }}
                 className={`px-1.5 py-1.5 rounded-md border ${highlightOn ? 'border-cyan-400 bg-cyan-500/10 text-cyan-200 shadow-[0_0_8px_rgba(56,189,248,0.5)]' : 'border-white/10 bg-white/0 hover:bg-white/5 text-slate-200'}`}
                 title="Toggle highlighter"
               >
