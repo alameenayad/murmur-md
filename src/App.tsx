@@ -1409,7 +1409,47 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
     Array.from(container.querySelectorAll<HTMLElement>('.neon-highlight')).forEach(el => el.classList.remove('neon-highlight'))
   }, [current.id])
 
-  // (Removed global selectionchange to avoid cross-case interference)
+  // Attach end-of-selection listeners to the active case container only
+  useEffect(() => {
+    if (!highlightOn) return
+    const container = caseContainerRef.current
+    const scope = vignetteRef.current
+    if (!container || !scope) return
+    const onEnd = () => {
+      // allow browsers to finalize the selection range
+      window.setTimeout(() => {
+        const sel = window.getSelection()
+        if (!sel || sel.isCollapsed || sel.rangeCount === 0) return
+        const range = sel.getRangeAt(0)
+        // Restrict strictly to scenario paragraph
+        const withinScenario =
+          scope.contains(range.commonAncestorContainer) &&
+          scope.contains(range.startContainer) &&
+          scope.contains(range.endContainer)
+        if (!withinScenario) return
+        try {
+          const span = document.createElement('span')
+          span.className = 'neon-highlight'
+          span.setAttribute('data-hl', '1')
+          try {
+            range.surroundContents(span)
+          } catch {
+            const contents = range.extractContents()
+            span.appendChild(contents)
+            range.insertNode(span)
+          }
+        } finally {
+          try { sel.removeAllRanges() } catch {}
+        }
+      }, 50)
+    }
+    container.addEventListener('pointerup', onEnd, { passive: true })
+    container.addEventListener('touchend', onEnd, { passive: true })
+    return () => {
+      container.removeEventListener('pointerup', onEnd)
+      container.removeEventListener('touchend', onEnd)
+    }
+  }, [highlightOn, current.id])
 
   // Generate shuffled options for current case
   const shuffledOptions = useMemo(() => {
@@ -1456,16 +1496,15 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
 
   // selection-based highlighting removed in favor of consistent token-based taps
   function clearHighlights() {
-    const container = vignetteRef.current
-    if (!container) return
-    Array.from(container.querySelectorAll<HTMLElement>('.neon-highlight')).forEach(el => {
-      if ((el as HTMLElement).dataset.hl === '1') {
-        const parent = el.parentNode as HTMLElement | null
-        while (el.firstChild) parent?.insertBefore(el.firstChild, el)
-        parent?.removeChild(el)
-      } else {
-        el.classList.remove('neon-highlight')
-      }
+    const scope = vignetteRef.current
+    if (!scope) return
+    // Unwrap any span we created or fallback elements that still carry the class
+    const nodes = scope.querySelectorAll<HTMLElement>('[data-hl=\"1\"], .neon-highlight')
+    nodes.forEach(el => {
+      const parent = el.parentNode as HTMLElement | null
+      // unwrap contents
+      while (el.firstChild) parent?.insertBefore(el.firstChild, el)
+      parent?.removeChild(el)
     })
   }
 
@@ -1514,6 +1553,7 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
             {/* Vignette: selection-based highlighting; drag to highlight; tap also supported */}
             <p
               ref={vignetteRef}
+              key={current.id}
               onMouseUp={handleSelectionHighlight}
               onTouchEnd={handleSelectionHighlight}
               className="mb-4 select-text leading-relaxed"
