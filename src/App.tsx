@@ -5,9 +5,9 @@ import { FiActivity, FiFolder, FiBookOpen, FiArrowLeft, FiArrowRight, FiCheckCir
 import { LuEraser } from 'react-icons/lu'
 import { TbStethoscope, TbBrain, TbEar, TbTopologyStar3 } from 'react-icons/tb'
 
-type Scene = 'intro' | 'ausc' | 'skills' | 'ward' | 'quiz' | 'library' | 'refs'
+type Scene = 'intro' | 'ausc' | 'skills' | 'ward' | 'quiz' | 'ward2' | 'progress' | 'library' | 'refs'
 
-const scenes: Scene[] = ['intro', 'ausc', 'skills', 'ward', 'quiz', 'library', 'refs']
+const scenes: Scene[] = ['intro', 'ausc', 'skills', 'ward', 'quiz', 'ward2', 'progress', 'library', 'refs']
 
 const variants = {
   enter: { x: 24, opacity: 0 },
@@ -27,6 +27,8 @@ export default function App() {
   const [stethoscopeOn, setStethoscopeOn] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [desktopNavCollapsed, setDesktopNavCollapsed] = useState(false)
+  const [round1Score, setRound1Score] = useState<number|null>(null)
+  const [round2Score, setRound2Score] = useState<number|null>(null)
 
   function next() { stop(); setSceneIndex(i => Math.min(i + 1, scenes.length - 1)) }
   function prev() { stop(); setSceneIndex(i => Math.max(i - 1, 0)) }
@@ -37,6 +39,8 @@ export default function App() {
     skills: 'Skills Lab',
     ward: 'Ward Round',
     quiz: 'Audio Recognition Quiz',
+    ward2: 'Ward Round II',
+    progress: 'Progress Summary',
     library: 'Consultant\'s Library',
     refs: 'References',
   }[scene]), [scene])
@@ -78,6 +82,13 @@ export default function App() {
     if (!stethoscopeOn) stop()
   }, [stethoscopeOn])
 
+  // Reset accuracy at the start of each Ward round
+  useEffect(() => {
+    if (scene === 'ward' || scene === 'ward2') {
+      setAccuracy(100)
+    }
+  }, [scene])
+
   return (
     <div className="min-h-[100svh] bg-slate-950 text-slate-100">
       <div className={`h-full sm:h-screen sm:grid ${desktopNavCollapsed ? 'sm:grid-cols-[64px_1fr]' : 'sm:grid-cols-[240px_1fr]'}`}>
@@ -106,8 +117,10 @@ export default function App() {
             <SidebarItem collapsed={desktopNavCollapsed} label="Skills Lab" active={scene==='skills'} onClick={()=>goto(2)} icon={<TbStethoscope />} />
             <SidebarItem collapsed={desktopNavCollapsed} label="Ward Round" active={scene==='ward'} onClick={()=>goto(3)} icon={<FiFolder />} />
             <SidebarItem collapsed={desktopNavCollapsed} label="Audio Quiz" active={scene==='quiz'} onClick={()=>goto(4)} icon={<FiActivity />} />
-            <SidebarItem collapsed={desktopNavCollapsed} label="Library" active={scene==='library'} onClick={()=>goto(5)} icon={<FiBookOpen />} />
-            <SidebarItem collapsed={desktopNavCollapsed} label="References" active={scene==='refs'} onClick={()=>goto(6)} icon={<FiBookOpen />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Ward Round II" active={scene==='ward2'} onClick={()=>goto(5)} icon={<FiFolder />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Progress" active={scene==='progress'} onClick={()=>goto(6)} icon={<FiActivity />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="Library" active={scene==='library'} onClick={()=>goto(7)} icon={<FiBookOpen />} />
+            <SidebarItem collapsed={desktopNavCollapsed} label="References" active={scene==='refs'} onClick={()=>goto(8)} icon={<FiBookOpen />} />
           </nav>
           <div className="mt-auto space-y-4">
             <div className="w-full grid place-items-center">
@@ -154,8 +167,10 @@ export default function App() {
             <SidebarItem label="Skills Lab" active={scene==='skills'} onClick={()=>{goto(2); setMobileNavOpen(false)}} icon={<TbStethoscope />} />
             <SidebarItem label="Ward Round" active={scene==='ward'} onClick={()=>{goto(3); setMobileNavOpen(false)}} icon={<FiFolder />} />
             <SidebarItem label="Audio Quiz" active={scene==='quiz'} onClick={()=>{goto(4); setMobileNavOpen(false)}} icon={<FiActivity />} />
-            <SidebarItem label="Library" active={scene==='library'} onClick={()=>{goto(5); setMobileNavOpen(false)}} icon={<FiBookOpen />} />
-            <SidebarItem label="References" active={scene==='refs'} onClick={()=>{goto(6); setMobileNavOpen(false)}} icon={<FiBookOpen />} />
+            <SidebarItem label="Ward Round II" active={scene==='ward2'} onClick={()=>{goto(5); setMobileNavOpen(false)}} icon={<FiFolder />} />
+            <SidebarItem label="Progress" active={scene==='progress'} onClick={()=>{goto(6); setMobileNavOpen(false)}} icon={<FiActivity />} />
+            <SidebarItem label="Library" active={scene==='library'} onClick={()=>{goto(7); setMobileNavOpen(false)}} icon={<FiBookOpen />} />
+            <SidebarItem label="References" active={scene==='refs'} onClick={()=>{goto(8); setMobileNavOpen(false)}} icon={<FiBookOpen />} />
           </nav>
           <div className="mt-auto space-y-4">
             <div className="w-full grid place-items-center">
@@ -210,8 +225,10 @@ export default function App() {
                 {scene === 'intro' && <Intro onBegin={next} />}
                 {scene === 'ausc' && <Auscultation />}
                 {scene === 'skills' && <Skills onNext={next} onPrev={prev} onPlay={play} openFindings={(list)=>{setFindingsList(list); setFindingsOpen(true)}} stethoscopeOn={stethoscopeOn} />}
-                {scene === 'ward' && <Ward onNext={next} onPrev={prev} setAccuracy={setAccuracy} accuracy={accuracy} stethoscopeOn={stethoscopeOn} onPlay={play} onStop={stop} />}
+                {scene === 'ward' && <Ward onNext={next} onPrev={prev} setAccuracy={setAccuracy} accuracy={accuracy} stethoscopeOn={stethoscopeOn} onPlay={play} onStop={stop} onFinishRound={(score)=> setRound1Score(score)} />}
                 {scene === 'quiz' && <AudioQuiz onPlay={play} onStop={stop} stethoscopeOn={stethoscopeOn} />}
+                {scene === 'ward2' && <Ward2 onNext={()=>{ setRound2Score(accuracy); next() }} onPrev={prev} setAccuracy={setAccuracy} accuracy={accuracy} stethoscopeOn={stethoscopeOn} onPlay={play} onStop={stop} onFinishRound={(score)=> setRound2Score(score)} />}
+                {scene === 'progress' && <Progress r1={round1Score} r2={round2Score} onPrev={prev} />}
                 {scene === 'library' && <Library onPrev={prev} />}
                 {scene === 'refs' && <References />}
               </motion.section>
@@ -772,6 +789,53 @@ const adultCases: Case[] = standardAdultMurmurs.map((m, i) => {
     audio: m.audio || undefined,
     feedbackCorrect: `Correct: ${m.name} — Why we hear it: ${whyMap[m.name] ?? 'see Skills for underlying mechanism.'}`,
     feedbackWrong: `Hint: ${hints[m.name] ?? 'Revisit timing, location, radiation and associated signs.'} — Try again.`,
+  }
+})
+
+// Second ward round deck: same conditions, new scenarios and shuffled demographics
+const adultCases2: Case[] = standardAdultMurmurs.map((m, i) => {
+  const pool = standardAdultMurmurs.map(x => x.name)
+  const opts = buildOptions(m.name, pool)
+  const altNames = ['Fatima Al‑Zahra','Carlos Mendes','Aanya Shah','Jonas Berg','Sara Haddad','David Levy','Isabella Conti','Thabo Ndlovu']
+  const altScenarios: Record<string, string> = {
+    'Normal Heart Sounds': 'Routine pre‑employment medical for a barista who cycles daily; no symptoms; exam is a baseline comparison.',
+    'Aortic Stenosis': 'Manual labourer notices lightheadedness when carrying loads upstairs; slow‑rising pulse on exam.',
+    'Aortic Regurgitation': 'Complains of a pounding heartbeat when lying on the left side and mild exertional dyspnoea.',
+    'Mitral Regurgitation': 'Intermittent palpitations with reduced exercise tolerance; blowing pansystolic murmur at apex.',
+    'Mitral Stenosis': 'Breathless on inclines with occasional orthopnoea; opening snap followed by diastolic rumble.',
+    'Tricuspid Regurgitation': 'Ankle swelling and abdominal fullness; prominent v‑waves in the JVP; murmur louder on inspiration.',
+    'Hypertrophic Obstructive Cardiomyopathy': 'Sports participant with exertional chest tightness; murmur increases on standing.',
+    'Ventricular Septal Defect': 'Long‑standing murmur noted since childhood; otherwise fit; harsh holosystolic at LLSB with thrill.',
+    'Innocent (Still’s) Murmur': 'Healthy student with a soft, vibratory mid‑systolic sound that varies with posture.',
+    'Patent Ductus Arteriosus': 'Bounding pulses with wide pulse pressure; continuous machinery‑like murmur infraclavicular.'
+  }
+  // Reuse previous vitals patterns but vary slightly
+  const vitals = [
+    { hr: '76', bp: '118/74', spo2: '99', rr: '14', temp: '36.6' },
+    { hr: '60', bp: '102/68', spo2: '99', rr: '16', temp: '36.7' },
+    { hr: '88', bp: '155/52', spo2: '98', rr: '18', temp: '36.7' },
+    { hr: '108', bp: '128/62', spo2: '95', rr: '20', temp: '36.8' },
+    { hr: '112', bp: '104/68', spo2: '94', rr: '22', temp: '36.8' },
+    { hr: '100', bp: '110/70', spo2: '95', rr: '20', temp: '36.7' },
+    { hr: '118', bp: '92/58', spo2: '98', rr: '16', temp: '36.7' },
+    { hr: '98', bp: '116/68', spo2: '97', rr: '18', temp: '36.7' },
+    { hr: '92', bp: '112/70', spo2: '99', rr: '16', temp: '36.6' },
+    { hr: '122', bp: '122/42', spo2: '97', rr: '20', temp: '36.7' },
+  ]
+  const v = vitals[i % vitals.length]
+  const vitalsText = `Vitals:\nHR: ${v.hr} bpm\nBP: ${v.bp} mmHg\nSpO₂: ${v.spo2}% RA\nRR: ${v.rr}/min\nTemp: ${v.temp}°C`
+  return {
+    id: `std-ad2-${i+1}`,
+    title: `Ward Case II – Bed ${i+1}`,
+    patientName: altNames[i % altNames.length],
+    age: 20 + ((i * 4) % 35),
+    sex: (i % 2 === 0 ? 'F' : 'M') as 'F' | 'M',
+    vignette: `${altScenarios[m.name] ?? 'Assess the murmur characteristics and correlate with the clinical picture.'}\n\n${vitalsText}`,
+    options: opts,
+    correctIndex: opts.indexOf(m.name),
+    audio: m.audio || undefined,
+    feedbackCorrect: `Correct: ${m.name} — Why we hear it: ${whyMap[m.name] ?? 'see Skills for underlying mechanism.'}`,
+    feedbackWrong: `Hint: ${m.name.includes('Regurgitation') ? 'Listen for pansystolic vs early diastolic patterns and radiation.' : 'Focus on timing, location, and response to inspiration/expiration.'} — Try again.`,
   }
 })
 
@@ -1387,7 +1451,7 @@ function AudioQuiz({ onPlay, onStop, stethoscopeOn }: { onPlay: (src: string | s
     </div>
   )
 }
-function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, onStop }: { onNext: () => void, onPrev: () => void, setAccuracy: Dispatch<SetStateAction<number>>, accuracy: number, stethoscopeOn: boolean, onPlay: (src: string | string[])=>void, onStop: () => void }) {
+function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, onStop, onFinishRound }: { onNext: () => void, onPrev: () => void, setAccuracy: Dispatch<SetStateAction<number>>, accuracy: number, stethoscopeOn: boolean, onPlay: (src: string | string[])=>void, onStop: () => void, onFinishRound: (score: number)=>void }) {
   const deck = adultCases
   const [idx, setIdx] = useState(0)
   const [selected, setSelected] = useState<number|null>(null)
@@ -1515,7 +1579,7 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
 
   function nextCase() {
     onStop()
-    if (isLast) { onNext(); return }
+    if (isLast) { onFinishRound(accuracy); onNext(); return }
     hlRef.current?.dispose()
     hlRef.current = null
     setSelected(null)
@@ -1574,6 +1638,203 @@ function Ward({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, o
                     const next = !v
                     if (!next) {
                       // when pen is turned off, clear highlights for this card
+                      clearHighlights()
+                    }
+                    return next
+                  })
+                }}
+                className={`px-1.5 py-1.5 rounded-md border ${highlightOn ? 'border-cyan-400 bg-cyan-500/10 text-cyan-200 shadow-[0_0_8px_rgba(56,189,248,0.5)]' : 'border-white/10 bg-white/0 hover:bg-white/5 text-slate-200'}`}
+                title="Toggle highlighter"
+              >
+                <FiPenTool size={16} />
+              </button>
+            </div>
+            <div className="flex items-center gap-2 mb-4">
+              <button disabled={!stethoscopeOn || !current.audio} onClick={()=> current.audio && onPlay([current.audio, current.audio.replace(/^\/assets\/audio\//,'/audio/'), current.audio.replace(/^\/assets\//,'/')])} className={`px-3 py-1.5 rounded-md ${stethoscopeOn? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200':'bg-white/10 text-slate-300 opacity-60'} `}>🔊 Listen</button>
+              {!stethoscopeOn && <span className="text-amber-300 text-xs">Equip stethoscope to enable listening</span>}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {shuffledOptions.shuffled.map((d, i) => (
+                <div key={d} className="flex items-stretch gap-2">
+                  <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  animate={selected===i ? (isCorrect? { scale: 1.03, backgroundColor: 'rgba(16,185,129,0.25)'} : { x: [0,-6,6,-4,4,0], backgroundColor: 'rgba(239,68,68,0.25)'}) : {}}
+                    onClick={() => { if (!eliminated.has(i)) choose(i) }}
+                    className={`px-3 py-2 rounded-md bg-white/10 hover:bg-white/20 flex items-center gap-2 flex-1 ${eliminated.has(i)? 'line-through opacity-50 pointer-events-none' : ''}`}
+                  >
+                  {selected===i && isCorrect===true && <FiCheckCircle className="text-emerald-400"/>}
+                  {selected===i && isCorrect===false && <FiXCircle className="text-rose-400"/>}
+                  {d}
+                </motion.button>
+                  <button
+                    aria-label={eliminated.has(i)? 'Restore option':'Eliminate option'}
+                    onClick={()=>{
+                      setEliminated(prev => {
+                        const next = new Set(prev)
+                        if (next.has(i)) next.delete(i); else next.add(i)
+                        return next
+                      })
+                    }}
+                    className={`px-2 py-2 rounded-md border ${eliminated.has(i)? 'border-emerald-400/40 text-emerald-300 bg-emerald-500/10' : 'border-white/10 text-slate-300 hover:bg-white/10'}`}
+                    title="Cross out"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          {selected!==null && (
+            <div className="mt-4 rounded-lg border border-white/10 bg-white/5 p-3 text-sm">
+              {isCorrect ? (
+                <div className="text-emerald-300">{current.feedbackCorrect}</div>
+              ) : (
+                <div className="text-amber-300">{current.feedbackWrong}</div>
+              )}
+            </div>
+          )}
+          </motion.div>
+        </AnimatePresence>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4">
+          <button onClick={prevCase} disabled={isFirst} className="px-3 py-2 sm:px-4 sm:py-2 rounded-md bg-white/10 hover:bg-white/20 disabled:opacity-40 text-sm">Previous Patient</button>
+          <div className="flex items-center gap-3 sm:flex-1">
+            <div className="h-3 rounded-full bg-white/10 overflow-hidden flex-1">
+              <div className="h-full accuracy-fill" style={{ width: `${accuracy}%` }} />
+            </div>
+            <div className="text-sm text-slate-300 w-14 text-right">{accuracy}%</div>
+          </div>
+          <button onClick={nextCase} className="px-3 py-2 sm:px-4 sm:py-2 rounded-md bg-emerald-500/90 text-slate-900 font-semibold hover:bg-emerald-400 text-sm">{isLast ? 'Finish Round' : 'Next Patient'}</button>
+        </div>
+        <CaseClipboard caseData={current} />
+      </div>
+    </div>
+  )
+}
+
+function Ward2({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, onStop, onFinishRound }: { onNext: () => void, onPrev: () => void, setAccuracy: Dispatch<SetStateAction<number>>, accuracy: number, stethoscopeOn: boolean, onPlay: (src: string | string[])=>void, onStop: () => void, onFinishRound: (score: number)=>void }) {
+  const deck = adultCases2
+  const [idx, setIdx] = useState(0)
+  const [selected, setSelected] = useState<number|null>(null)
+  const [isCorrect, setIsCorrect] = useState<boolean|null>(null)
+  const [attempts, setAttempts] = useState(0)
+  const current = deck[idx]
+  const [highlightOn, setHighlightOn] = useState(true)
+  const [eliminated, setEliminated] = useState<Set<number>>(new Set())
+  const caseContainerRef = useRef<HTMLDivElement|null>(null)
+  const vignetteRef = useRef<HTMLParagraphElement|null>(null)
+  const [vignetteNonce, setVignetteNonce] = useState(0)
+  const hlRef = useRef<CaseHighlighter|null>(null)
+
+  function getVignetteEl(): HTMLParagraphElement | null {
+    const container = caseContainerRef.current
+    if (!container) return null
+    return (container.querySelector('p[data-vignette=\"1\"]') as HTMLParagraphElement | null) 
+      ?? (container.querySelector('p') as HTMLParagraphElement | null)
+  }
+
+  // Reset highlight state and remove previous marks when case changes
+  useEffect(() => {
+    setEliminated(new Set())
+    const scope = getVignetteEl()
+    if (scope) scope.replaceChildren(document.createTextNode(current.vignette))
+    setVignetteNonce(0)
+    // (re)create highlighter instance for this case
+    const root = vignetteRef.current
+    if (hlRef.current) { try { hlRef.current.dispose() } catch {} hlRef.current = null }
+    if (root) {
+      hlRef.current = new CaseHighlighter(root)
+      if (!highlightOn) hlRef.current.disable()
+    }
+    return () => {
+      if (hlRef.current) { try { hlRef.current.dispose() } catch {} hlRef.current = null }
+    }
+  }, [current.id])
+
+  // Reflect enable/disable state to the current highlighter instance
+  useEffect(() => {
+    if (!hlRef.current) return
+    if (highlightOn) hlRef.current.enable(); else hlRef.current.disable()
+  }, [highlightOn])
+
+  const shuffledOptions = useMemo(() => {
+    return shuffleWithCorrectIndex(current.options, current.correctIndex)
+  }, [idx, current.options, current.correctIndex])
+
+  function choose(i: number) {
+    if (isCorrect === true) return
+    const correct = i===shuffledOptions.newCorrectIndex
+    setSelected(i)
+    setIsCorrect(correct)
+    if (attempts === 0) {
+    setAccuracy(a=> Math.max(0, Math.min(100, a + (correct? +3 : -6))))
+    }
+    setAttempts(a => a + 1)
+  }
+
+  function clearHighlights() {
+    hlRef.current?.clear()
+  }
+
+  const isLast = idx >= deck.length - 1
+  const isFirst = idx <= 0
+
+  function nextCase() {
+    onStop()
+    if (isLast) { onFinishRound(accuracy); onNext(); return }
+    hlRef.current?.dispose()
+    hlRef.current = null
+    setSelected(null)
+    setIsCorrect(null)
+    setAttempts(0)
+    setIdx(i => Math.min(i+1, deck.length-1))
+  }
+
+  function prevCase() {
+    onStop()
+    if (isFirst) return
+    hlRef.current?.dispose()
+    hlRef.current = null
+    setSelected(null)
+    setIsCorrect(null)
+    setAttempts(0)
+    setIdx(i => Math.max(0, i-1))
+  }
+
+  return (
+    <div className="h-full flex flex-col">
+      <HeadphoneNotice />
+      <div className="flex-1 mx-auto max-w-4xl w-full px-6 py-8 grid grid-rows-[auto_1fr_auto] gap-6">
+        <Mentor text="Second round. New patients, same core conditions. Show your consolidation." />
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.div ref={caseContainerRef} key={current.id} data-case="1" data-caseid={current.id} initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.5 }} className="relative rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
+            <div className="text-sm text-slate-300 mb-1">{current.title}</div>
+            <div className="text-xs text-slate-400 mb-3">Patient: {current.patientName} · {current.age}y · {current.sex}</div>
+            <p
+              ref={vignetteRef}
+              key={`${current.id}-${vignetteNonce}`}
+              data-vignette="1"
+              className="mb-4 select-text leading-relaxed"
+            >
+              {current.vignette}
+            </p>
+            <div className="absolute top-3 right-1 z-10 flex flex-row gap-1.5 hl-controls">
+              <button
+                onPointerUp={(e)=> e.stopPropagation()}
+                onTouchEnd={(e)=> { e.stopPropagation() }}
+                onMouseUp={(e)=> e.stopPropagation()}
+                onClick={()=> clearHighlights()}
+                className="px-1.5 py-1.5 rounded-md border border-white/10 bg-white/0 hover:bg-white/5 text-slate-200"
+                title="Clear highlights"
+              >
+                <LuEraser size={16} />
+              </button>
+              <button
+                onPointerUp={(e)=> e.stopPropagation()}
+                onTouchEnd={(e)=> { e.stopPropagation() }}
+                onMouseUp={(e)=> e.stopPropagation()}
+                onClick={()=>{
+                  setHighlightOn(v=>{
+                    const next = !v
+                    if (!next) {
                       clearHighlights()
                     }
                     return next
@@ -1816,6 +2077,51 @@ function ECGBar() {
           className="ecg-stroke"
         />
       </svg>
+    </div>
+  )
+}
+
+function Progress({ r1, r2, onPrev: _onPrev }: { r1: number|null, r2: number|null, onPrev: () => void }) {
+  const s1 = r1 ?? 0
+  const s2 = r2 ?? 0
+  const delta = s2 - s1
+  const verdict = s2 >= 90 ? 'Excellent' : s2 >= 75 ? 'Strong' : s2 >= 60 ? 'Pass' : 'Needs Practice'
+  const color = s2 >= 90 ? 'text-emerald-300' : s2 >= 75 ? 'text-cyan-300' : s2 >= 60 ? 'text-amber-300' : 'text-rose-300'
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 mx-auto max-w-3xl w-full px-6 py-10 grid grid-rows-[auto_1fr] gap-8">
+        <Mentor text="Nice work. Here’s your consolidation summary. Aim for consistent improvement and stable recognition under varied scenarios." />
+        <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+          <div className="grid sm:grid-cols-3 gap-4 items-center">
+            <div className="rounded-lg border border-white/10 bg-black/20 p-4 text-center">
+              <div className="text-xs uppercase tracking-wide text-slate-300">Ward Round I</div>
+              <div className="text-3xl font-bold text-emerald-300 mt-1">{Math.max(0, Math.min(100, Math.round(s1)))}%</div>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-black/20 p-4 text-center">
+              <div className="text-xs uppercase tracking-wide text-slate-300">Ward Round II</div>
+              <div className="text-3xl font-bold text-emerald-300 mt-1">{Math.max(0, Math.min(100, Math.round(s2)))}%</div>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-black/20 p-4 text-center">
+              <div className="text-xs uppercase tracking-wide text-slate-300">Change</div>
+              <div className={`text-3xl font-bold ${delta >= 0 ? 'text-emerald-300' : 'text-rose-300'} mt-1`}>
+                {delta >= 0 ? '+' : ''}{Math.round(delta)}%
+              </div>
+            </div>
+          </div>
+          <div className="mt-6 flex items-center justify-between">
+            <div className={`text-sm font-semibold ${color}`}>Outcome: {verdict}</div>
+            <div className="flex items-center gap-3">
+              <a
+                href={`data:text/plain;charset=utf-8,${encodeURIComponent(`MurmurMD Progress\nRound I: ${Math.round(s1)}%\nRound II: ${Math.round(s2)}%\nChange: ${delta >= 0 ? '+' : ''}${Math.round(delta)}%\nOutcome: ${verdict}\n`)}`}
+                download="murmurmd-progress.txt"
+                className="px-3 py-1.5 rounded-md border border-white/10 bg-white/0 hover:bg-white/5 text-sm"
+              >
+                Download Summary
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
