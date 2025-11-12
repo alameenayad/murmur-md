@@ -794,7 +794,7 @@ const congenitalCases: Case[] = standardPedsMurmurs.map((m, i) => {
   }
 })
 
-function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, onStop }: { onNext: () => void, onPrev: () => void, setAccuracy: Dispatch<SetStateAction<number>>, accuracy: number, stethoscopeOn: boolean, onPlay: (src: string | string[])=>void, onStop: () => void }) {
+export function Peds({ onNext, onPrev: _onPrev, setAccuracy, accuracy, stethoscopeOn, onPlay, onStop }: { onNext: () => void, onPrev: () => void, setAccuracy: Dispatch<SetStateAction<number>>, accuracy: number, stethoscopeOn: boolean, onPlay: (src: string | string[])=>void, onStop: () => void }) {
   const deck = congenitalCases
   const [idx, setIdx] = useState(0)
   const [selected, setSelected] = useState<number|null>(null)
